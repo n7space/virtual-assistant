@@ -7,6 +7,7 @@ TEST_DIR: str = os.path.dirname(os.path.realpath(__file__))
 RESOURCE_DIR: str = os.path.join(TEST_DIR, "resources")
 logging.basicConfig(level=logging.DEBUG)
 
+
 def test_mappings_init():
     mappings = varequirementreader.Mappings()
 
@@ -19,14 +20,15 @@ def test_mappings_init():
     assert "G" == mappings.note
     assert "E" == mappings.justification
 
+
 def test_mappings_update_from_dict():
     dictionary = {
-        "id" : "X",
-        "description" : "Y",
-        "note" : "Z",
-        "justification" : "AA",
-        "first_row_number" : 100,
-        "worksheet_name" : "reqs"
+        "id": "X",
+        "description": "Y",
+        "note": "Z",
+        "justification": "AA",
+        "first_row_number": 100,
+        "worksheet_name": "reqs",
     }
 
     mappings = varequirementreader.Mappings().update_from_dict(dictionary)
@@ -38,9 +40,12 @@ def test_mappings_update_from_dict():
     assert "Z" == mappings.note
     assert "AA" == mappings.justification
 
+
 def test_requirements_are_read():
     path = os.path.join(RESOURCE_DIR, "test_requirements.xlsx")
-    mappings = varequirementreader.Mappings().update_from_dict({"worksheet_name": "reqs"})
+    mappings = varequirementreader.Mappings().update_from_dict(
+        {"worksheet_name": "reqs"}
+    )
     reader = varequirementreader.VaRequirementReader(mappings)
 
     requirements = reader.read_requirements(path)
@@ -76,4 +81,3 @@ def test_requirements_are_read():
     req90 = requirements[8]
     assert "REQ-90" == req90.id
     assert "Like a panda" == req90.note
-    

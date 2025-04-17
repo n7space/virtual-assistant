@@ -3,16 +3,17 @@ import json
 import logging
 import openpyxl
 
-class Requirement:
-    id : str
-    type : str
-    validation_type : str
-    description : str
-    note : str
-    justification : str
-    traces : List[str]
 
-    def __init__(self, id : str = "", description : str = "") -> None:
+class Requirement:
+    id: str
+    type: str
+    validation_type: str
+    description: str
+    note: str
+    justification: str
+    traces: List[str]
+
+    def __init__(self, id: str = "", description: str = "") -> None:
         self.id = id
         self.type = None
         self.validation_type = None
@@ -21,17 +22,18 @@ class Requirement:
         self.justification = None
         self.traces = []
 
+
 class Mappings:
-    worksheet_name : str
-    first_row_number : int
-    id : str
-    type : str
-    validation_type : str
-    description : str
-    note : str
-    justification : str
-    traces : str
-    trace_separator : str
+    worksheet_name: str
+    first_row_number: int
+    id: str
+    type: str
+    validation_type: str
+    description: str
+    note: str
+    justification: str
+    traces: str
+    trace_separator: str
 
     def __init__(self) -> None:
         # Column mappings based on MBEP-KISPE-EP-SRS-001 v1.0
@@ -46,7 +48,7 @@ class Mappings:
         self.traces = "D"
         self.trace_separator = ","
 
-    def update_from_dict(self, dict : Dict) -> 'Mappings':
+    def update_from_dict(self, dict: Dict) -> "Mappings":
         self.worksheet_name = dict.get("worksheet_name", self.worksheet_name)
         self.first_row_number = dict.get("first_row_number", self.first_row_number)
         self.id = dict.get("id", self.id)
@@ -59,21 +61,22 @@ class Mappings:
         self.trace_separator = dict.get("trace_separator", self.trace_separator)
         return self
 
-class VaRequirementReader:
-    __mappings : Mappings
 
-    def __init__(self, mappings : Mappings = None) -> None:
+class VaRequirementReader:
+    __mappings: Mappings
+
+    def __init__(self, mappings: Mappings = None) -> None:
         self.__mappings = mappings if mappings is not None else Mappings()
 
     # openpyxl is not very well typed
-    def __read_value(self, sheet, mapping : str, index : int):
+    def __read_value(self, sheet, mapping: str, index: int):
         # Let's use key notation instead of indexing, e.g., "B12", as it is more human readable
         key = mapping + str(index)
         value = sheet[key].value
         logging.debug(f"Reading values {key} -> {value}")
         return value
 
-    def read_requirements(self, file_name : str) -> List[Requirement]:
+    def read_requirements(self, file_name: str) -> List[Requirement]:
         result = []
         wb = openpyxl.load_workbook(file_name)
         sheet = wb[self.__mappings.worksheet_name]
@@ -81,15 +84,22 @@ class VaRequirementReader:
             requirement = Requirement()
             requirement.id = self.__read_value(sheet, self.__mappings.id, row)
             requirement.type = self.__read_value(sheet, self.__mappings.type, row)
-            requirement.validation_type = self.__read_value(sheet, self.__mappings.validation_type, row)
-            requirement.description = self.__read_value(sheet, self.__mappings.description, row)
+            requirement.validation_type = self.__read_value(
+                sheet, self.__mappings.validation_type, row
+            )
+            requirement.description = self.__read_value(
+                sheet, self.__mappings.description, row
+            )
             requirement.note = self.__read_value(sheet, self.__mappings.note, row)
-            requirement.justification = self.__read_value(sheet, self.__mappings.justification, row)
+            requirement.justification = self.__read_value(
+                sheet, self.__mappings.justification, row
+            )
             requirement.traces = self.__read_value(sheet, self.__mappings.traces, row)
             if requirement.traces is not None:
-                requirement.traces = requirement.traces.split(self.__mappings.trace_separator)
+                requirement.traces = requirement.traces.split(
+                    self.__mappings.trace_separator
+                )
             else:
                 requirement.traces = []
             result.append(requirement)
         return result
-    
