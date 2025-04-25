@@ -1,5 +1,5 @@
 SRC_DIR = ../../
-PYTHON ?= python
+PYTHON ?= python3
 
 TESTS = \
 	test_varequirementreader.py \
