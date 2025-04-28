@@ -9,6 +9,7 @@ def main():
     The main entry point of Virtual Assistant.
     """
     logging.basicConfig(level=logging.DEBUG)
+    # TODO - this is a temporary CLI, used only for testing
     template = "### History\n{0}### Context information\n{1}\n### Instruction\n{2}"
     context = ""
     llm = Llm()

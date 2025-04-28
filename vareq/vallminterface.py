@@ -3,8 +3,6 @@ import requests
 import logging
 from langchain_ollama.llms import OllamaLLM
 from langchain_ollama import OllamaEmbeddings
-from langchain_core.prompts import ChatPromptTemplate
-from langchain.schema import AIMessage, HumanMessage, SystemMessage
 
 
 class Llm:
@@ -80,16 +78,19 @@ class Chat:
 ### Instruction
 Summarize the conversation history to include both the previous history, and the new query and reply. Be as concise as possible, do not include any formatting directives."""
 
+    def set_history_summarization_template(self, template: str):
+        self.history_summarization_template = template
+
     def chat(self, template: str, context_data: str, question: str) -> str:
         query = template.format(self.history, context_data, question)
-        logging.debug(f"Query: {query}")
+        logging.debug(f"Query:\n---\n{query}\n---")
         answer = self.llm.query(query)
-        logging.debug(f"Asnwer: {answer}")
+        logging.debug(f"Asnwer:\n---\n{answer}\n---")
         history_query = self.history_summarization_template.format(
             self.history, question, answer
         )
-        logging.debug(f"History query: {history_query}")
+        logging.debug(f"History query:\n---\n{history_query}\n---")
         new_history = self.llm.query(history_query)
-        logging.debug(f"History: {new_history}")
+        logging.debug(f"History:\n---\n{new_history}\n---")
         self.history = new_history
         return answer
