@@ -85,7 +85,9 @@ Summarize the conversation history to include both the previous history, and the
         logging.debug(f"Query: {query}")
         answer = self.llm.query(query)
         logging.debug(f"Asnwer: {answer}")
-        history_query = self.history_summarization_template.format(self.history, question, answer)
+        history_query = self.history_summarization_template.format(
+            self.history, question, answer
+        )
         logging.debug(f"History query: {history_query}")
         new_history = self.llm.query(history_query)
         logging.debug(f"History: {new_history}")

@@ -15,11 +15,10 @@ def main():
     chat = Chat(llm)
     while True:
         query = input()
-        if (len(query) == 0):
+        if len(query) == 0:
             break
         answer = chat.chat(template, context, query)
         print(answer)
-
 
 
 if __name__ == "__main__":
