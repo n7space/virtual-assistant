@@ -13,7 +13,8 @@ setup(
     url="https://github.com/n7space/virtualassistant",
     install_requires=[
         "pytest==7.4.2",
-        "openpyxl==3.1.5"],
+        "openpyxl==3.1.5",
+        "python-docx==1.1.2"],
     python_requires=">=3.7",
     classifiers=[
         "Programming Language :: Python",
