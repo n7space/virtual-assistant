@@ -40,12 +40,12 @@ def test_chat_has_memory():
     llm = vallminterface.Llm()
     if not llm.is_available():
         pytest.skip("Ollama not available")
-    template = "### History\n{0}### Context information\n{1}\n### Instruction\n{2}"
+    llm.set_temperature(0.0)  # Be as deterministic as possible
     context = ""
     chat = vallminterface.Chat(llm)
 
-    chat.chat(template, context, "The topic of the discussion is Medieval Trains")
-    answer = chat.chat(template, context, "What is the topic of the discussion?")
+    chat.chat(context, "The topic of the discussion is Medieval Trains")
+    answer = chat.chat(context, "What is the topic of the discussion?")
 
     assert answer is not None
     assert 10 < len(answer)
@@ -56,14 +56,14 @@ def test_chat_understands_context():
     llm = vallminterface.Llm()
     if not llm.is_available():
         pytest.skip("Ollama not available")
-    template = "### History\n{0}### Context information\n{1}\n### Instruction\n{2}"
+    llm.set_temperature(0.0)  # Be as deterministic as possible
     context = "The system has OBC with CPU, Mass Memory with 128 GB of flash and Power Supply providing 12V"
     chat = vallminterface.Chat(llm)
 
-    answer = chat.chat(template, context, "What are the elements of the system?")
+    answer = chat.chat(context, "What are the elements of the system?")
 
     assert answer is not None
     assert 10 < len(answer)
-    assert "cpu" in answer.lower()
+    assert "obc" in answer.lower()
     assert "mass memory" in answer.lower()
     assert "power supply" in answer.lower()

@@ -10,7 +10,6 @@ def main():
     """
     logging.basicConfig(level=logging.DEBUG)
     # TODO - this is a temporary CLI, used only for testing
-    template = "### History\n{0}### Context information\n{1}\n### Instruction\n{2}"
     context = ""
     llm = Llm()
     chat = Chat(llm)
@@ -18,7 +17,7 @@ def main():
         query = input()
         if len(query) == 0:
             break
-        answer = chat.chat(template, context, query)
+        answer = chat.chat(context, query)
         print(answer)
 
 

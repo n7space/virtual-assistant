@@ -64,10 +64,14 @@ class Llm:
 class Chat:
     llm: Llm
     history: str
+    query_template: str
     history_summarization_template: str
 
     def __init__(self, llm: Llm):
         self.llm = llm
+        self.query_template = (
+            "### History\n{0}### Context information\n{1}\n### Instruction\n{2}"
+        )
         self.history = ""
         self.history_summarization_template = """### Previous history
 {0}
@@ -81,8 +85,11 @@ Summarize the conversation history to include both the previous history, and the
     def set_history_summarization_template(self, template: str):
         self.history_summarization_template = template
 
-    def chat(self, template: str, context_data: str, question: str) -> str:
-        query = template.format(self.history, context_data, question)
+    def set_query_template(self, template: str):
+        self.query_template = str
+
+    def chat(self, context_data: str, question: str) -> str:
+        query = self.query_template.format(self.history, context_data, question)
         logging.debug(f"Query:\n---\n{query}\n---")
         answer = self.llm.query(query)
         logging.debug(f"Asnwer:\n---\n{answer}\n---")
