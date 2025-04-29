@@ -30,6 +30,7 @@ def main():
         context = lib.get_relevant_documents(query, 1)[0]
         answer = chat.chat(context, query)
         print(f"Retrieved context is\n---------------\n{context}\n---------------\n")
+        print(f"Query: {query}\n")
         print(f"Answer: {answer}\n")
 
 
