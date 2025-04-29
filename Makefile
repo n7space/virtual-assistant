@@ -1,4 +1,5 @@
 BLACK=black
+PYTHON ?= python3
 
 .PHONY : check \
 	all \
@@ -9,7 +10,7 @@ BLACK=black
 all: check-format check
 
 install:
-	python3 -m pip install --user --upgrade .
+	${PYTHON} -m pip install --user --upgrade .
 
 check:
 	$(MAKE) -C tests check

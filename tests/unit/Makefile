@@ -3,7 +3,8 @@ PYTHON ?= python3
 
 TESTS = \
 	test_varequirementreader.py \
-	test_vaknowledgelibrary.py
+	test_vaknowledgelibrary.py \
+	test_vallminterface.py
 
 .PHONY : \
 	check \
