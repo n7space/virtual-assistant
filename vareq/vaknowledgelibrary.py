@@ -10,9 +10,11 @@ import langchain_text_splitters
 from .vallminterface import Llm
 from .varequirementreader import Requirement
 
+
 class ItemKind(Enum):
     DOCUMENT = 1
     REQUIREMENT = 2
+
 
 class KnowledgeLibraryConfig:
     chunk_size: int
@@ -29,7 +31,7 @@ class KnowledgeLibrary:
     persistent_db: chromadb.ClientAPI
     documents: chromadb.Collection
     llm: Llm
-    config : KnowledgeLibraryConfig
+    config: KnowledgeLibraryConfig
 
     def __init__(self, llm: Llm, config: KnowledgeLibraryConfig):
         self.llm = llm
@@ -81,26 +83,30 @@ class KnowledgeLibrary:
         for chunk in chunks:
             logging.debug(f"Chunk: {chunk}")
         return chunks
-    
-    def register_document(self, name : str, path : str, timestamp : float, text : str):
-        logging.debug(f"Registering document {name} from path {path} of timestamp {timestamp}")
+
+    def register_document(self, name: str, path: str, timestamp: float, text: str):
+        logging.debug(
+            f"Registering document {name} from path {path} of timestamp {timestamp}"
+        )
         chunks = self.split_text(text)
         for index, chunk in enumerate(chunks):
             embedding = self.llm.embedding(chunk)
             self.documents.add(
-                ids = [f"{path}:{index}"],
-                metadatas=[{
-                    "path" : path,
-                    "name" : name,
-                    "index" : index,
-                    "timestamp" : timestamp,
-                    "type" : "document"
-                }],
+                ids=[f"{path}:{index}"],
+                metadatas=[
+                    {
+                        "path": path,
+                        "name": name,
+                        "index": index,
+                        "timestamp": timestamp,
+                        "type": ItemKind.DOCUMENT.value,
+                    }
+                ],
                 documents=[f"### Document {name} part {index}\n" + chunk],
-                embeddings = embedding
+                embeddings=embedding,
             )
 
-    def is_document_up_to_date(self, path : str) -> bool:
+    def is_document_up_to_date(self, path: str) -> bool:
         registered_timestamp = self.get_document_timestamp(path)
         if registered_timestamp < 0:
             # Document is not registered, so not up to date
@@ -111,7 +117,7 @@ class KnowledgeLibrary:
         # Document is registered, and the timestamp is not in the past
         return True
 
-    def add_document(self, path : str, override : bool = False) -> bool:
+    def add_document(self, path: str, override: bool = False) -> bool:
         if not override:
             if self.is_document_up_to_date(path):
                 logging.debug(f"Document {path} not added, as up-to-date")
@@ -122,23 +128,58 @@ class KnowledgeLibrary:
         self.register_document(name, path, timestamp, text)
         return True
 
-    def add_directory(self, path : str, override : bool = False) -> int:
+    def add_directory(self, path: str, override: bool = False) -> int:
         root = pathlib.Path(path)
         extensions = [".txt", ".docx", ".pdf"]
         for file in root.rglob("*"):
             path = pathlib.Path(file)
-            extension =  path.suffix.lower()
+            extension = path.suffix.lower()
             file_path = str(path)
-            logging.debug(f"Adding directory {path}: found file {file_path} with extension {extension}")
+            logging.debug(
+                f"Adding directory {path}: found file {file_path} with extension {extension}"
+            )
             if extension in extensions:
                 logging.debug(f"Adding file {file_path} from directory {path}")
                 self.add_document(file_path, override)
 
-    #def set_requirements(self, requirements : List[Requirement]):
+    def delete_all_documents(self):
+        self.documents.delete(where={"type": ItemKind.DOCUMENT.value})
 
+    def delete_all_requirements(self):
+        self.documents.delete(where={"type": ItemKind.REQUIREMENT.value})
+
+    def add_requirement(self, requirement: Requirement):
+        logging.debug(f"Adding requirement {requirement.id}: {requirement.description}")
+        text = (
+            f"### Requirement {requirement.id}\nDescription: {requirement.description}"
+        )
+        if requirement.note is not None and len(requirement.note) > 0:
+            text = f"{text}\nNote: {requirement.note}\n"
+        if requirement.justification is not None and len(requirement.justification) > 0:
+            text = f"{text}\nJustification: {requirement.justification}\n"
+
+        embedding = self.llm.embedding(text)
+        self.documents.add(
+            ids=[f"REQ:{requirement.id}"],
+            metadatas=[
+                {
+                    "path": "",
+                    "name": requirement.id,
+                    "index": 0,
+                    "timestamp": -1,
+                    "type": ItemKind.REQUIREMENT.value,
+                }
+            ],
+            documents=[text],
+            embeddings=embedding,
+        )
+
+    def add_requirements(self, requirements: List[Requirement]):
+        for requirement in requirements:
+            self.add_requirement(requirement)
 
     def get_document_timestamp(self, path) -> float:
-        results = self.documents.get(where={"path" : path}, include=["metadatas"])
+        results = self.documents.get(where={"path": path}, include=["metadatas"])
         metadatas = results["metadatas"]
         if len(metadatas) == 0:
             return -1
@@ -146,8 +187,8 @@ class KnowledgeLibrary:
         for meta in metadatas:
             timestamp = min(timestamp, meta["timestamp"])
         return timestamp
-    
-    def get_relevant_documents(self, text : str, count : int) -> List[str]:
+
+    def get_relevant_documents(self, text: str, count: int) -> List[str]:
         embedding = self.llm.embedding(text)
         results = self.documents.query(query_embeddings=[embedding], n_results=count)
         docs = []
