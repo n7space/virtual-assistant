@@ -80,12 +80,12 @@ def test_registering_document_works():
     config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
     config.persistent_storage_path = db_path
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
+
     library.register_document("Test1", "test1.txt", 200, "Lorem Ipsum")
     library.register_document("Test2", "test2.txt", 500, "Lorem Ipsum")
 
     timestamp1 = library.get_document_timestamp("test1.txt")
     timestamp2 = library.get_document_timestamp("test2.txt")
-
     assert 200 == timestamp1
     assert 500 == timestamp2
 
@@ -120,7 +120,6 @@ def test_adding_document_works():
     added = library.add_document(file1.name)
 
     docs = library.get_relevant_documents("Cats", 1)
-
     assert 1 == len(docs)
     assert "awesome" in docs[0]
     assert added
