@@ -71,7 +71,7 @@ def test_text_is_split_properly():
 
     assert chunks is not None
     assert 36 == len(chunks)
-    assert 922 == len(chunks[0])
+    assert 892 == len(chunks[0])
 
 
 def test_registering_document_works():

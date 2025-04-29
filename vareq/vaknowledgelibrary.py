@@ -51,7 +51,7 @@ class KnowledgeLibrary:
         return "\n".join(lines)
 
     def read_txt(self, file_path: str) -> str:
-        with open(file_path) as file:
+        with open(file_path, encoding="utf-8") as file:
             content = file.read()
             logging.debug(f"Retrieved content: {content}")
             return content
