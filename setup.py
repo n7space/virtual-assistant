@@ -19,7 +19,8 @@ setup(
         "langchain==0.3.24",
         "langchain-core==0.3.56",
         "langchain-ollama==0.3.2",
-        "pdfplumber==0.11.6"],
+        "pdfplumber==0.11.6",
+        "chromadb==1.0.7"],
     python_requires=">=3.7",
     classifiers=[
         "Programming Language :: Python",
