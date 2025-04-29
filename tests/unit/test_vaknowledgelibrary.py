@@ -15,4 +15,24 @@ def test_docx_is_read_properly():
 
     assert text is not None
     assert 10 < len(text)
-    assert "Static Architecture" in text
+    assert " Static Architecture of the Universal Army Potato" in text
+
+def test_pdf_is_read_properly():
+    library = vaknowledgelibrary.KnowledgeLibrary()
+    path = os.path.join(RESOURCE_DIR, "test pdf.pdf")
+
+    text = library.read_document(path)
+
+    assert text is not None
+    assert 10 < len(text)
+    assert " Static Architecture of the Universal Army Potato" in text
+
+def test_txt_is_read_properly():
+    library = vaknowledgelibrary.KnowledgeLibrary()
+    path = os.path.join(RESOURCE_DIR, "test txt.txt")
+
+    text = library.read_document(path)
+
+    assert text is not None
+    assert 10 < len(text)
+    assert " Static Architecture of the Universal Army Potato" in text

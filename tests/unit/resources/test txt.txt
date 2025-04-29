@@ -1,0 +1,13 @@
+This is some specification 
+Introduction 
+This specification describes the Universal Army Potato. The Universal Army Potato (UAP) is 
+a fierce and fearsome weapon that can be used against enemy infantry. 
+Despite its biological nature, it is not governed by any International Treaties that are in force 
+as of writing this document. 
+Potato Static Architecture 
+The following chapter describes the Static Architecture of the Universal Army Potato. The 
+overall architecture is presented in Figure 1. 
+\^_^/
+Figure 1 Universal Army Potato static architecture 
+The presented figure makes absolutely no sense, just as the Universal Army Potato 
+procurement.

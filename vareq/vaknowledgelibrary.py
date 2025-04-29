@@ -2,6 +2,7 @@ from typing import List, Set, Dict
 import logging
 import docx
 import pathlib
+import pdfplumber
 
 class KnowledgeLibrary:
 
@@ -18,10 +19,19 @@ class KnowledgeLibrary:
         return "\n".join(lines)
 
     def read_txt(self, file_path : str) -> str:
-        pass
+        with open(file_path) as file:
+            content = file.read()
+            logging.debug(f"Retrieved content: {content}")
+            return content 
 
     def read_pdf(self, file_path : str) -> str:
-        pass
+        lines = []
+        with pdfplumber.open(file_path) as pdf:
+            for page in pdf.pages:
+                page_text = page.extract_text_simple()
+                lines.append(page_text)
+                logging.debug(f"Retrieved page: {page_text}")
+        return "\n".join(lines)
 
     def read_document(self, file_path : str) -> str:
         extension = pathlib.Path(file_path).suffix.lower()
