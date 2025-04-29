@@ -62,7 +62,7 @@ class Mappings:
         return self
 
 
-class VaRequirementReader:
+class RequirementReader:
     __mappings: Mappings
 
     def __init__(self, mappings: Mappings = None) -> None:

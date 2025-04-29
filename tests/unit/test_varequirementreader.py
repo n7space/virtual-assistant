@@ -46,7 +46,7 @@ def test_requirements_are_read():
     mappings = varequirementreader.Mappings().update_from_dict(
         {"worksheet_name": "reqs"}
     )
-    reader = varequirementreader.VaRequirementReader(mappings)
+    reader = varequirementreader.RequirementReader(mappings)
 
     requirements = reader.read_requirements(path)
 
