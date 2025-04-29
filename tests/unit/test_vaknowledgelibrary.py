@@ -117,3 +117,19 @@ def test_adding_document_works():
     assert 1 == len(docs)
     assert "awesome" in docs[0]
     assert added
+
+def test_adding_directory_works():
+    db_path = os.path.join(tempfile.mkdtemp(), 'db')
+    llm = FakeLlm()
+    config = vaknowledgelibrary.KnowledgeLibraryConfig() # default
+    config.persistent_storage_path = db_path
+    library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
+  
+    # reuse resources dir
+    library.add_directory(RESOURCE_DIR)
+
+    docs = library.get_all_documents()
+    headers = [doc.splitlines()[0] for doc in docs]
+    assert 3 <= len(docs)
+    assert "### Document test txt part 0" in headers 
+    

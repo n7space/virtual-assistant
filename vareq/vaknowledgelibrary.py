@@ -1,4 +1,5 @@
 from typing import List, Set, Dict
+from enum import Enum
 import logging
 import os.path
 import docx
@@ -7,7 +8,11 @@ import pdfplumber
 import chromadb
 import langchain_text_splitters
 from .vallminterface import Llm
+from .varequirementreader import Requirement
 
+class ItemKind(Enum):
+    DOCUMENT = 1
+    REQUIREMENT = 2
 
 class KnowledgeLibraryConfig:
     chunk_size: int
@@ -78,6 +83,7 @@ class KnowledgeLibrary:
         return chunks
     
     def register_document(self, name : str, path : str, timestamp : float, text : str):
+        logging.debug(f"Registering document {name} from path {path} of timestamp {timestamp}")
         chunks = self.split_text(text)
         for index, chunk in enumerate(chunks):
             embedding = self.llm.embedding(chunk)
@@ -88,6 +94,7 @@ class KnowledgeLibrary:
                     "name" : name,
                     "index" : index,
                     "timestamp" : timestamp,
+                    "type" : "document"
                 }],
                 documents=[f"### Document {name} part {index}\n" + chunk],
                 embeddings = embedding
@@ -107,12 +114,28 @@ class KnowledgeLibrary:
     def add_document(self, path : str, override : bool = False) -> bool:
         if not override:
             if self.is_document_up_to_date(path):
+                logging.debug(f"Document {path} not added, as up-to-date")
                 return False
         timestamp = os.path.getmtime(path)
         name = pathlib.Path(path).stem
         text = self.read_document(path)
         self.register_document(name, path, timestamp, text)
         return True
+
+    def add_directory(self, path : str, override : bool = False) -> int:
+        root = pathlib.Path(path)
+        extensions = [".txt", ".docx", ".pdf"]
+        for file in root.rglob("*"):
+            path = pathlib.Path(file)
+            extension =  path.suffix.lower()
+            file_path = str(path)
+            logging.debug(f"Adding directory {path}: found file {file_path} with extension {extension}")
+            if extension in extensions:
+                logging.debug(f"Adding file {file_path} from directory {path}")
+                self.add_document(file_path, override)
+
+    #def set_requirements(self, requirements : List[Requirement]):
+
 
     def get_document_timestamp(self, path) -> float:
         results = self.documents.get(where={"path" : path}, include=["metadatas"])
@@ -129,5 +152,12 @@ class KnowledgeLibrary:
         results = self.documents.query(query_embeddings=[embedding], n_results=count)
         docs = []
         for document in results["documents"][0]:
+            docs.append(document)
+        return docs
+
+    def get_all_documents(self) -> List[str]:
+        results = self.documents.get()
+        docs = []
+        for document in results["documents"]:
             docs.append(document)
         return docs
