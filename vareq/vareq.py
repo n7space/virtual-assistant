@@ -10,18 +10,15 @@ def main():
     """
     logging.basicConfig(level=logging.DEBUG)
     # TODO - this is a temporary CLI, used only for testing
-    llm_config = LlmConfig()
-    llm_config.chat_model_name = "qwen2.5"
-    llm_config.embeddings_model_name = "nomic-embed-text"
-    # TODO - temporary setup, a more powerful LLM is executed on a remote computer
-    llm_config.url = "192.168.1.110:11434"
-    llm_config.temperature = 0.2
-
     cfg = EngineConfig()
-    cfg.llm_config = llm_config
+    cfg.llm_config.chat_model_name = "qwen2.5"
+    cfg.llm_config.embeddings_model_name = "nomic-embed-text"
+    # TODO - temporary setup, a more powerful LLM is executed on a remote computer
+    cfg.llm_config.url = "192.168.1.110:11434"
+    cfg.llm_config.temperature = 0.2
     cfg.document_directories = ["./"]
-    cfg.requirements_file_path = "requirements.xlsx"
     # Temporary, to make it compatible with the custom test sheet
+    cfg.requirements_file_path = "requirements.xlsx"
     cfg.lib_config.requirement_document_mappings = Mappings().update_from_dict(
         {
             "worksheet_name": "Requirements",
@@ -39,9 +36,9 @@ def main():
 
     engine = Engine(cfg)
     chat = engine.get_chat()
-    print(f"----------------------------")
-    print(f"System ready, please enter your query")
     while True:
+        print(f"----------------------------")
+        print(f"System ready, please enter your query")
         query = input()
         if len(query) == 0:
             print("System: Exiting...")

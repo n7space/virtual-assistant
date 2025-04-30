@@ -140,6 +140,9 @@ class KnowledgeLibrary:
             return False
         actual_timestamp = os.path.getmtime(path)
         if actual_timestamp > registered_timestamp:
+            logging.info(
+                f'Document "{path}" timestamp changed from {registered_timestamp} to {actual_timestamp}'
+            )
             return False
         # Document is registered, and the timestamp is not in the past
         return True
@@ -149,6 +152,7 @@ class KnowledgeLibrary:
             if self.is_requirements_document_up_to_date(path):
                 logging.info(f"Requirements {path} not added, as up-to-date")
                 return False
+        # Only one source of requirements is supported
         self.delete_all_requirements()
         timestamp = os.path.getmtime(path)
         reader = RequirementReader(self.config.requirement_document_mappings)
