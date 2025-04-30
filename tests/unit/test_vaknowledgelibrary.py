@@ -192,6 +192,7 @@ def test_deleting_requirements_works():
     docs = library.get_relevant_documents("working", 2)
     assert 0 == len(docs)
 
+
 def test_getting_requirements_timestamp_works():
     db_path = os.path.join(tempfile.mkdtemp(), "db")
     llm = FakeLlm()

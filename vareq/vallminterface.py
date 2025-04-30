@@ -5,6 +5,7 @@ import re
 from langchain_ollama.llms import OllamaLLM
 from langchain_ollama import OllamaEmbeddings
 
+
 class LlmConfig:
     chat_model_name: str
     embeddings_model_name: str
@@ -19,6 +20,7 @@ class LlmConfig:
         self.url = "127.0.0.1:11434"
         self.temperature = 0.8
 
+
 class Llm:
     chat_model_name: str
     embeddings_model_name: str
@@ -27,10 +29,7 @@ class Llm:
     url: str
     temperature: float
 
-    def __init__(
-        self,
-        config : LlmConfig
-    ):
+    def __init__(self, config: LlmConfig):
         self.url = config.url
         self.temperature = config.temperature
         self.set_chat_model(config.chat_model_name)
@@ -75,7 +74,7 @@ class Llm:
 class ChatConfig:
     query_template: str
     history_summarization_template: str
-    remove_thinking : bool
+    remove_thinking: bool
 
     def __init__(self):
         self.query_template = """### History
@@ -95,16 +94,16 @@ You are an expert requirements engineer, working in the space industry. You have
 ### Instruction
 Summarize the conversation history to include both the previous history, and the new query and reply. Be as concise as possible, do not include any formatting directives."""
 
+
 class Chat:
     llm: Llm
     history: str
-    config : ChatConfig
+    config: ChatConfig
 
-    def __init__(self, llm: Llm, config : ChatConfig):
+    def __init__(self, llm: Llm, config: ChatConfig):
         self.llm = llm
         self.config = config
         self.history = ""
-
 
     def set_history_summarization_template(self, template: str):
         self.config.history_summarization_template = template
@@ -112,10 +111,10 @@ class Chat:
     def set_query_template(self, template: str):
         self.config.query_template = str
 
-    def cleanup_reply(self, reply : str) -> str:
+    def cleanup_reply(self, reply: str) -> str:
         if self.config.remove_thinking and "<think>" in reply and "</think>" in reply:
             pattern = "<think>.*?</think>"
-            return re.sub(pattern,"", reply, flags=re.DOTALL).strip()
+            return re.sub(pattern, "", reply, flags=re.DOTALL).strip()
         return reply
 
     def chat(self, context_data: str, question: str) -> str:

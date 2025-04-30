@@ -5,15 +5,17 @@ import os
 
 logging.basicConfig(level=logging.DEBUG)
 
+
 def test_chat_removes_thinking():
     # LLM is not used
     chat_config = vallminterface.ChatConfig()
     chat = vallminterface.Chat(None, chat_config)
     reply_in = "<think>If a > b, then c is red</think>Apples are green!"
-    
+
     reply_out = chat.cleanup_reply(reply_in)
 
     assert "Apples are green!" == reply_out
+
 
 def test_chat_thinking_removal_handles_newlines():
     # LLM is not used
@@ -23,20 +25,22 @@ def test_chat_thinking_removal_handles_newlines():
 If a > b, then c is red
 </think>
 Apples are green!"""
-    
+
     reply_out = chat.cleanup_reply(reply_in)
 
     assert "Apples are green!" == reply_out
+
 
 def test_chat_does_not_alter_thoughtless_replies():
     # LLM is not used
     chat_config = vallminterface.ChatConfig()
     chat = vallminterface.Chat(None, chat_config)
     reply_in = "This (2+1!=x^2) is some serious math!"
-    
+
     reply_out = chat.cleanup_reply(reply_in)
 
     assert "This (2+1!=x^2) is some serious math!" == reply_out
+
 
 def test_chat_query():
     config = vallminterface.LlmConfig()

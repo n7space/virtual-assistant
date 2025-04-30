@@ -20,7 +20,7 @@ class KnowledgeLibraryConfig:
     chunk_size: int
     chunk_overlap: int
     persistent_storage_path: str
-    requirement_document_mappings : Mappings
+    requirement_document_mappings: Mappings
 
     def __init__(self):
         self.chunk_size = 8000
@@ -88,7 +88,7 @@ class KnowledgeLibrary:
 
     def register_document(self, name: str, path: str, timestamp: float, text: str):
         logging.info(
-            f"Registering document \"{name}\" from path \"{path}\" of timestamp {timestamp}"
+            f'Registering document "{name}" from path "{path}" of timestamp {timestamp}'
         )
         chunks = self.split_text(text)
         for index, chunk in enumerate(chunks):
@@ -115,7 +115,9 @@ class KnowledgeLibrary:
             return False
         actual_timestamp = os.path.getmtime(path)
         if actual_timestamp > registered_timestamp:
-            logging.info(f"Document \"{path}\" timestamp changed from {registered_timestamp} to {actual_timestamp}")
+            logging.info(
+                f'Document "{path}" timestamp changed from {registered_timestamp} to {actual_timestamp}'
+            )
             return False
         # Document is registered, and the timestamp is not in the past
         return True
@@ -130,8 +132,8 @@ class KnowledgeLibrary:
         text = self.read_document(path)
         self.register_document(name, path, timestamp, text)
         return True
-    
-    def is_requirements_document_up_to_date(self, path : str) -> bool:
+
+    def is_requirements_document_up_to_date(self, path: str) -> bool:
         registered_timestamp = self.get_requirements_timestamp()
         if registered_timestamp < 0:
             # Document is not registered, so not up to date
@@ -141,8 +143,8 @@ class KnowledgeLibrary:
             return False
         # Document is registered, and the timestamp is not in the past
         return True
-    
-    def set_requirements_document(self, path : str, override: bool = False) -> bool:
+
+    def set_requirements_document(self, path: str, override: bool = False) -> bool:
         if not override:
             if self.is_requirements_document_up_to_date(path):
                 logging.info(f"Requirements {path} not added, as up-to-date")
@@ -162,10 +164,10 @@ class KnowledgeLibrary:
             extension = path.suffix.lower()
             file_path = str(path)
             logging.debug(
-                f"Adding directory \"{path}\": found file \"{file_path}\" with extension \"{extension}\""
+                f'Adding directory "{path}": found file "{file_path}" with extension "{extension}"'
             )
             if extension in extensions:
-                logging.info(f"Adding file \"{file_path}\" from directory \"{path}\"")
+                logging.info(f'Adding file "{file_path}" from directory "{path}"')
                 self.add_document(file_path, override)
 
     def delete_all_documents(self):
@@ -176,7 +178,7 @@ class KnowledgeLibrary:
         logging.debug(f"Deleting all requirements")
         self.documents.delete(where={"type": ItemKind.REQUIREMENT.value})
 
-    def add_requirement(self, requirement: Requirement, timestamp : float = -1):
+    def add_requirement(self, requirement: Requirement, timestamp: float = -1):
         logging.info(f"Adding requirement {requirement.id}: {requirement.description}")
         text = (
             f"### Requirement {requirement.id}\nDescription: {requirement.description}"
@@ -202,7 +204,7 @@ class KnowledgeLibrary:
             embeddings=embedding,
         )
 
-    def add_requirements(self, requirements: List[Requirement], timestamp : float = -1):
+    def add_requirements(self, requirements: List[Requirement], timestamp: float = -1):
         for requirement in requirements:
             self.add_requirement(requirement, timestamp)
 
@@ -217,7 +219,9 @@ class KnowledgeLibrary:
         return timestamp
 
     def get_requirements_timestamp(self) -> float:
-        results = self.documents.get(where={"type": ItemKind.REQUIREMENT.value}, include=["metadatas"])
+        results = self.documents.get(
+            where={"type": ItemKind.REQUIREMENT.value}, include=["metadatas"]
+        )
         metadatas = results["metadatas"]
         if len(metadatas) == 0:
             return -1

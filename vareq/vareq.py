@@ -8,6 +8,7 @@ from .vaknowledgelibrary import KnowledgeLibraryConfig
 from .vaengine import Engine, EngineConfig
 from .varequirementreader import Mappings
 
+
 def main():
     """
     The main entry point of Virtual Assistant.
@@ -27,16 +28,18 @@ def main():
     cfg.requirements_file_path = "requirements.xlsx"
     # Temporary, to make it compatible with the custom test sheet
     cfg.lib_config.requirement_document_mappings = Mappings().update_from_dict(
-        {"worksheet_name": "Requirements",
-         "first_row_number" : 2,
-         "id" : "D",
-         "type" : "",
-         "validation_type" : "I",
-         "description" : "E",
-         "note" : "F",
-         "justification" : "G",
-         "traces" : "H",
-         "trace_separator" : ","}
+        {
+            "worksheet_name": "Requirements",
+            "first_row_number": 2,
+            "id": "D",
+            "type": "",
+            "validation_type": "I",
+            "description": "E",
+            "note": "F",
+            "justification": "G",
+            "traces": "H",
+            "trace_separator": ",",
+        }
     )
 
     engine = Engine(cfg)
@@ -56,6 +59,7 @@ def main():
         print(f"-- Reference names: {','.join(reply.reference_names)}")
         print(f"-- User query: {reply.query}")
         print(f"-- System response: {reply.answer}")
+
 
 if __name__ == "__main__":
     main()
