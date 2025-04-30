@@ -1,9 +1,23 @@
 from typing import List, Set, Dict
 import requests
 import logging
+import re
 from langchain_ollama.llms import OllamaLLM
 from langchain_ollama import OllamaEmbeddings
 
+class LlmConfig:
+    chat_model_name: str
+    embeddings_model_name: str
+    chat_model: object
+    embeddings_model: object
+    url: str
+    temperature: float
+
+    def __init__(self):
+        self.chat_model_name = "qwen2.5:1.5b-instruct-q8_0"
+        self.embeddings_model_name = "nomic-embed-text"
+        self.url = "127.0.0.1:11434"
+        self.temperature = 0.8
 
 class Llm:
     chat_model_name: str
@@ -15,18 +29,12 @@ class Llm:
 
     def __init__(
         self,
- #       chat_model_name: str = "qwen2.5:1.5b-instruct-q8_0",
- #       chat_model_name: str = "mistral-nemo:12b-instruct-2407-q2_K",
-        chat_model_name: str = "qwen3:4b",
-        embeddings_model_name: str = "nomic-embed-text",
-#        url: str = "127.0.0.1:11434",
-        url: str = "192.168.1.110:11434",
-        temperature: float = 0.8,
+        config : LlmConfig
     ):
-        self.url = url
-        self.temperature = temperature
-        self.set_chat_model(chat_model_name)
-        self.set_embedding_model(embeddings_model_name)
+        self.url = config.url
+        self.temperature = config.temperature
+        self.set_chat_model(config.chat_model_name)
+        self.set_embedding_model(config.embeddings_model_name)
 
     def set_url(self, url: str):
         self.url = url
@@ -69,12 +77,14 @@ class Chat:
     history: str
     query_template: str
     history_summarization_template: str
+    remove_thinking : bool
 
     def __init__(self, llm: Llm):
         self.llm = llm
         self.query_template = (
             "### History\n{0}### Context information\n{1}\n### Instruction\n{2}"
         )
+        self.remove_thinking = True
         self.history = ""
         self.history_summarization_template = """### Previous history
 {0}
@@ -91,16 +101,24 @@ Summarize the conversation history to include both the previous history, and the
     def set_query_template(self, template: str):
         self.query_template = str
 
+    def cleanup_reply(self, reply : str) -> str:
+        if self.remove_thinking and "<think>" in reply and "</think>" in reply:
+            pattern = "<think>.*?</think>"
+            return re.sub(pattern,"", reply, flags=re.DOTALL).strip()
+        return reply
+
     def chat(self, context_data: str, question: str) -> str:
         query = self.query_template.format(self.history, context_data, question)
         logging.debug(f"Query:\n---\n{query}\n---")
         answer = self.llm.query(query)
         logging.debug(f"Asnwer:\n---\n{answer}\n---")
+        clean_answer = self.cleanup_reply(answer)
+        # thinking does not need to clutter the memory
         history_query = self.history_summarization_template.format(
-            self.history, question, answer
+            self.history, question, clean_answer
         )
         logging.debug(f"History query:\n---\n{history_query}\n---")
         new_history = self.llm.query(history_query)
         logging.debug(f"History:\n---\n{new_history}\n---")
         self.history = new_history
-        return answer
+        return clean_answer

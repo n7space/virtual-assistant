@@ -5,9 +5,39 @@ import os
 
 logging.basicConfig(level=logging.DEBUG)
 
+def test_chat_removes_thinking():
+    # LLM is not used
+    chat = vallminterface.Chat(None)
+    reply_in = "<think>If a > b, then c is red</think>Apples are green!"
+    
+    reply_out = chat.cleanup_reply(reply_in)
+
+    assert "Apples are green!" == reply_out
+
+def test_chat_thinking_removal_handles_newlines():
+    # LLM is not used
+    chat = vallminterface.Chat(None)
+    reply_in = """<think>
+If a > b, then c is red
+</think>
+Apples are green!"""
+    
+    reply_out = chat.cleanup_reply(reply_in)
+
+    assert "Apples are green!" == reply_out
+
+def test_chat_does_not_alter_thoughless_replies():
+    # LLM is not used
+    chat = vallminterface.Chat(None)
+    reply_in = "This (2+1!=x^2) is some serious math!"
+    
+    reply_out = chat.cleanup_reply(reply_in)
+
+    assert "This (2+1!=x^2) is some serious math!" == reply_out
 
 def test_chat_query():
-    llm = vallminterface.Llm()
+    config = vallminterface.LlmConfig()
+    llm = vallminterface.Llm(config)
     if not llm.is_available():
         pytest.skip("Ollama not available")
     model_name = "qwen2.5:1.5b-instruct-q8_0"
@@ -22,7 +52,8 @@ def test_chat_query():
 
 
 def test_embedding():
-    llm = vallminterface.Llm()
+    config = vallminterface.LlmConfig()
+    llm = vallminterface.Llm(config)
     if not llm.is_available():
         pytest.skip("Ollama not available")
     model_name = "nomic-embed-text"
@@ -37,7 +68,8 @@ def test_embedding():
 
 
 def test_chat_has_memory():
-    llm = vallminterface.Llm()
+    config = vallminterface.LlmConfig()
+    llm = vallminterface.Llm(config)
     if not llm.is_available():
         pytest.skip("Ollama not available")
     llm.set_temperature(0.0)  # Be as deterministic as possible
@@ -53,7 +85,8 @@ def test_chat_has_memory():
 
 
 def test_chat_understands_context():
-    llm = vallminterface.Llm()
+    config = vallminterface.LlmConfig()
+    llm = vallminterface.Llm(config)
     if not llm.is_available():
         pytest.skip("Ollama not available")
     llm.set_temperature(0.0)  # Be as deterministic as possible

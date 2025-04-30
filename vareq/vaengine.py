@@ -2,7 +2,7 @@ import logging
 import pathlib
 import os.path
 from typing import List, Set, Dict
-from .vallminterface import Llm, Chat
+from .vallminterface import Llm, Chat, LlmConfig
 from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig
 from .varequirementreader import Requirement, RequirementReader, Mappings
 
@@ -12,7 +12,7 @@ class AugmentedChatConfig:
 
     def __init__(self):
         self.max_knowledge_items = 64
-        self.max_knowledge_size = 65536
+        self.max_knowledge_size = 16384
 
 class AugmentedChatReply:
     query : str
@@ -63,6 +63,7 @@ class AugmentedChat:
         return reply
     
 class EngineConfig:
+    llm_config : LlmConfig
     lib_config : KnowledgeLibraryConfig
     requirement_reader_mappings : Mappings
     requirements_file_path : str
@@ -73,6 +74,7 @@ class EngineConfig:
         self.requirements_file_path = None
         self.lib_config = KnowledgeLibraryConfig()
         self.requirement_reader_mappings = Mappings()
+        self.llm_config = LlmConfig()
 
 class Engine:
     chat : Chat
@@ -82,7 +84,7 @@ class Engine:
 
     def __init__(self, config : EngineConfig):
         self.config = config
-        self.llm = Llm()
+        self.llm = Llm(config.llm_config)
         self.chat = Chat(self.llm)
         self.lib = KnowledgeLibrary(self.llm, self.config.lib_config)
         for directory in self.config.document_directories:

@@ -13,6 +13,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class FakeLlm(vallminterface.Llm):
+    def __init__(self):
+        pass
+
     def embedding(self, text: str) -> List[float]:
         # Differentiate by length to support fake relevance searches
         result = [len(text), 2, 3, 4]

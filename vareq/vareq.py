@@ -2,7 +2,7 @@ from typing import List, Set
 import os.path
 import logging
 from .vallminterface import Chat
-from .vallminterface import Llm
+from .vallminterface import Llm, LlmConfig
 from .vaknowledgelibrary import KnowledgeLibrary
 from .vaknowledgelibrary import KnowledgeLibraryConfig
 from .vaengine import Engine, EngineConfig
@@ -14,7 +14,14 @@ def main():
     """
     logging.basicConfig(level=logging.INFO)
     # TODO - this is a temporary CLI, used only for testing
+    llm_config = LlmConfig()
+    llm_config.chat_model_name = "qwen2.5"
+    llm_config.embeddings_model_name = "nomic-embed-text"
+    llm_config.url = "192.168.1.110:11434"
+    llm_config.temperature = 0.8
+
     cfg = EngineConfig()
+    cfg.llm_config = llm_config
     cfg.document_directories = ["./"]
     cfg.requirements_file_path = os.path.join("tests","unit","resources","test_requirements.xlsx")
     # Temporary, to make it compatible with the custom test sheet
