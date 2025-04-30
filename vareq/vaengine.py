@@ -12,7 +12,7 @@ class AugmentedChatConfig:
 
     def __init__(self):
         self.max_knowledge_items = 64
-        self.max_knowledge_size = 16384
+        self.max_knowledge_size = 65536
 
 class AugmentedChatReply:
     query : str

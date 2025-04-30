@@ -85,7 +85,7 @@ class KnowledgeLibrary:
         return chunks
 
     def register_document(self, name: str, path: str, timestamp: float, text: str):
-        logging.debug(
+        logging.info(
             f"Registering document {name} from path {path} of timestamp {timestamp}"
         )
         chunks = self.split_text(text)

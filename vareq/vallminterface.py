@@ -15,9 +15,12 @@ class Llm:
 
     def __init__(
         self,
-        chat_model_name: str = "qwen2.5:1.5b-instruct-q8_0",
+ #       chat_model_name: str = "qwen2.5:1.5b-instruct-q8_0",
+ #       chat_model_name: str = "mistral-nemo:12b-instruct-2407-q2_K",
+        chat_model_name: str = "qwen3:4b",
         embeddings_model_name: str = "nomic-embed-text",
-        url: str = "127.0.0.1:11434",
+#        url: str = "127.0.0.1:11434",
+        url: str = "192.168.1.110:11434",
         temperature: float = 0.8,
     ):
         self.url = url

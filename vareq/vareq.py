@@ -12,7 +12,7 @@ def main():
     """
     The main entry point of Virtual Assistant.
     """
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     # TODO - this is a temporary CLI, used only for testing
     cfg = EngineConfig()
     cfg.document_directories = ["./"]
@@ -33,10 +33,11 @@ def main():
             return 0
         reply = chat.chat(query)
         print(f"----------------------------")
-        for reference in reply.references:
-            print(f"Reference:\n{reference}\n")
-        print(f"User query: {reply.query}")
-        print(f"System response: {reply.answer}")
+        for index, reference in enumerate(reply.references):
+            print(f"-- Reference {index}(length {len(reference)}):\n{reference}\n")
+        print(f"-- Total references: {len(reply.references)}")
+        print(f"-- User query: {reply.query}")
+        print(f"-- System response: {reply.answer}")
 
 if __name__ == "__main__":
     main()
