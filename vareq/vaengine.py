@@ -18,6 +18,7 @@ class AugmentedChatReply:
     query : str
     answer : str
     references : List[str]
+    reference_names : List[str]
 
 class AugmentedChat:
     llm_chat : Chat
@@ -45,6 +46,14 @@ class AugmentedChat:
                 break
         count = max(total_count, 1) # return at least one document
         return documents[0:count]
+    
+    def extract_reference_name(self, reference : str) -> str:
+        if reference is None:
+            return ""
+        lines = reference.splitlines()
+        if len(lines) == 0:
+            return ""
+        return lines[0].strip()
 
     def chat(self, query : str) -> AugmentedChatReply:
         reply = AugmentedChatReply()
@@ -56,6 +65,7 @@ class AugmentedChat:
             print(f"Document {document}")
         documents_count = len(documents)
         reply.references = documents
+        reply.reference_names = [self.extract_reference_name(x) for x in documents]
         documents.reverse() # The least relevant in the beggining (LLM may forget that)
         context = "\n".join(documents) if documents_count > 0 else "" 
         answer = self.llm_chat.chat(context, query)
@@ -65,7 +75,6 @@ class AugmentedChat:
 class EngineConfig:
     llm_config : LlmConfig
     lib_config : KnowledgeLibraryConfig
-    requirement_reader_mappings : Mappings
     requirements_file_path : str
     document_directories : List[str]
 
@@ -73,7 +82,6 @@ class EngineConfig:
         self.document_directories = []
         self.requirements_file_path = None
         self.lib_config = KnowledgeLibraryConfig()
-        self.requirement_reader_mappings = Mappings()
         self.llm_config = LlmConfig()
 
 class Engine:
@@ -90,10 +98,7 @@ class Engine:
         for directory in self.config.document_directories:
             self.lib.add_directory(directory)
         if self.config.requirements_file_path is not None and os.path.exists(self.config.requirements_file_path):
-            reader = RequirementReader(self.config.requirement_reader_mappings)
-            requirements = reader.read_requirements(self.config.requirements_file_path)
-            self.lib.delete_all_requirements()
-            self.lib.add_requirements(requirements)
+            self.lib.set_requirements_document(self.config.requirements_file_path)
 
     def get_chat(self) -> AugmentedChat:
         cfg = AugmentedChatConfig()

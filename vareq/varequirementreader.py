@@ -70,6 +70,8 @@ class RequirementReader:
 
     # openpyxl is not very well typed
     def __read_value(self, sheet, mapping: str, index: int):
+        if mapping is None or mapping == "":
+            return ""
         # Let's use key notation instead of indexing, e.g., "B12", as it is more human readable
         key = mapping + str(index)
         value = sheet[key].value

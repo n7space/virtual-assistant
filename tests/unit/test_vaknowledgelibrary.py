@@ -191,3 +191,17 @@ def test_deleting_requirements_works():
 
     docs = library.get_relevant_documents("working", 2)
     assert 0 == len(docs)
+
+def test_getting_requirements_timestamp_works():
+    db_path = os.path.join(tempfile.mkdtemp(), "db")
+    llm = FakeLlm()
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config.persistent_storage_path = db_path
+    library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
+    req1 = varequirementreader.Requirement("REQ-FUN-12", "It should work")
+    req2 = varequirementreader.Requirement("REQ-FUN-30", "It should dance")
+    library.add_requirements([req1, req2], 20.0)
+
+    timestamp = library.get_requirements_timestamp()
+
+    assert 20.0 == timestamp
