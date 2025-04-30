@@ -7,7 +7,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 def test_chat_removes_thinking():
     # LLM is not used
-    chat = vallminterface.Chat(None)
+    chat_config = vallminterface.ChatConfig()
+    chat = vallminterface.Chat(None, chat_config)
     reply_in = "<think>If a > b, then c is red</think>Apples are green!"
     
     reply_out = chat.cleanup_reply(reply_in)
@@ -16,7 +17,8 @@ def test_chat_removes_thinking():
 
 def test_chat_thinking_removal_handles_newlines():
     # LLM is not used
-    chat = vallminterface.Chat(None)
+    chat_config = vallminterface.ChatConfig()
+    chat = vallminterface.Chat(None, chat_config)
     reply_in = """<think>
 If a > b, then c is red
 </think>
@@ -26,9 +28,10 @@ Apples are green!"""
 
     assert "Apples are green!" == reply_out
 
-def test_chat_does_not_alter_thoughless_replies():
+def test_chat_does_not_alter_thoughtless_replies():
     # LLM is not used
-    chat = vallminterface.Chat(None)
+    chat_config = vallminterface.ChatConfig()
+    chat = vallminterface.Chat(None, chat_config)
     reply_in = "This (2+1!=x^2) is some serious math!"
     
     reply_out = chat.cleanup_reply(reply_in)
@@ -68,13 +71,14 @@ def test_embedding():
 
 
 def test_chat_has_memory():
-    config = vallminterface.LlmConfig()
-    llm = vallminterface.Llm(config)
+    llm_config = vallminterface.LlmConfig()
+    llm = vallminterface.Llm(llm_config)
     if not llm.is_available():
         pytest.skip("Ollama not available")
     llm.set_temperature(0.0)  # Be as deterministic as possible
     context = ""
-    chat = vallminterface.Chat(llm)
+    chat_config = vallminterface.ChatConfig()
+    chat = vallminterface.Chat(llm, chat_config)
 
     chat.chat(context, "The topic of the discussion is Medieval Trains")
     answer = chat.chat(context, "What is the topic of the discussion?")
@@ -85,13 +89,14 @@ def test_chat_has_memory():
 
 
 def test_chat_understands_context():
-    config = vallminterface.LlmConfig()
-    llm = vallminterface.Llm(config)
+    llm_config = vallminterface.LlmConfig()
+    llm = vallminterface.Llm(llm_config)
     if not llm.is_available():
         pytest.skip("Ollama not available")
     llm.set_temperature(0.0)  # Be as deterministic as possible
     context = "The system has OBC with CPU, Mass Memory with 128 GB of flash and Power Supply providing 12V"
-    chat = vallminterface.Chat(llm)
+    chat_config = vallminterface.ChatConfig()
+    chat = vallminterface.Chat(llm, chat_config)
 
     answer = chat.chat(context, "What are the elements of the system?")
 

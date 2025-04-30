@@ -2,7 +2,7 @@ import logging
 import pathlib
 import os.path
 from typing import List, Set, Dict
-from .vallminterface import Llm, Chat, LlmConfig
+from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
 from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig
 from .varequirementreader import Requirement, RequirementReader, Mappings
 
@@ -59,10 +59,6 @@ class AugmentedChat:
         reply = AugmentedChatReply()
         reply.query = query
         documents = self.get_relevant_documents(query)
-        print(f"Documents type {type(documents)}")
-        for document in documents:
-            print(f"Document type {type(document)}")
-            print(f"Document {document}")
         documents_count = len(documents)
         reply.references = documents
         reply.reference_names = [self.extract_reference_name(x) for x in documents]
@@ -74,6 +70,7 @@ class AugmentedChat:
     
 class EngineConfig:
     llm_config : LlmConfig
+    chat_config : ChatConfig
     lib_config : KnowledgeLibraryConfig
     requirements_file_path : str
     document_directories : List[str]
@@ -83,6 +80,7 @@ class EngineConfig:
         self.requirements_file_path = None
         self.lib_config = KnowledgeLibraryConfig()
         self.llm_config = LlmConfig()
+        self.chat_config = ChatConfig()
 
 class Engine:
     chat : Chat
@@ -93,7 +91,7 @@ class Engine:
     def __init__(self, config : EngineConfig):
         self.config = config
         self.llm = Llm(config.llm_config)
-        self.chat = Chat(self.llm)
+        self.chat = Chat(self.llm, config.chat_config)
         self.lib = KnowledgeLibrary(self.llm, self.config.lib_config)
         for directory in self.config.document_directories:
             self.lib.add_directory(directory)

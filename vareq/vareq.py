@@ -12,10 +12,10 @@ def main():
     """
     The main entry point of Virtual Assistant.
     """
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.DEBUG)
     # TODO - this is a temporary CLI, used only for testing
     llm_config = LlmConfig()
-    llm_config.chat_model_name = "qwen3:4b"
+    llm_config.chat_model_name = "qwen2.5"
     llm_config.embeddings_model_name = "nomic-embed-text"
     # TODO - temporary setup, a more powerful LLM is executed on a remote computer
     llm_config.url = "192.168.1.110:11434"

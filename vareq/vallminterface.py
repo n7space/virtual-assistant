@@ -72,20 +72,20 @@ class Llm:
             return False
 
 
-class Chat:
-    llm: Llm
-    history: str
+class ChatConfig:
     query_template: str
     history_summarization_template: str
     remove_thinking : bool
 
-    def __init__(self, llm: Llm):
-        self.llm = llm
-        self.query_template = (
-            "### History\n{0}### Context information\n{1}\n### Instruction\n{2}"
-        )
+    def __init__(self):
+        self.query_template = """### History
+{0}
+### Context information
+You are an expert requirements engineer, working in the space industry. You have access to the following:
+{1}
+### Instruction
+{2}"""
         self.remove_thinking = True
-        self.history = ""
         self.history_summarization_template = """### Previous history
 {0}
 ### New user query
@@ -95,26 +95,37 @@ class Chat:
 ### Instruction
 Summarize the conversation history to include both the previous history, and the new query and reply. Be as concise as possible, do not include any formatting directives."""
 
+class Chat:
+    llm: Llm
+    history: str
+    config : ChatConfig
+
+    def __init__(self, llm: Llm, config : ChatConfig):
+        self.llm = llm
+        self.config = config
+        self.history = ""
+
+
     def set_history_summarization_template(self, template: str):
-        self.history_summarization_template = template
+        self.config.history_summarization_template = template
 
     def set_query_template(self, template: str):
-        self.query_template = str
+        self.config.query_template = str
 
     def cleanup_reply(self, reply : str) -> str:
-        if self.remove_thinking and "<think>" in reply and "</think>" in reply:
+        if self.config.remove_thinking and "<think>" in reply and "</think>" in reply:
             pattern = "<think>.*?</think>"
             return re.sub(pattern,"", reply, flags=re.DOTALL).strip()
         return reply
 
     def chat(self, context_data: str, question: str) -> str:
-        query = self.query_template.format(self.history, context_data, question)
+        query = self.config.query_template.format(self.history, context_data, question)
         logging.debug(f"Query:\n---\n{query}\n---")
         answer = self.llm.query(query)
         logging.debug(f"Asnwer:\n---\n{answer}\n---")
         clean_answer = self.cleanup_reply(answer)
         # thinking does not need to clutter the memory
-        history_query = self.history_summarization_template.format(
+        history_query = self.config.history_summarization_template.format(
             self.history, question, clean_answer
         )
         logging.debug(f"History query:\n---\n{history_query}\n---")
