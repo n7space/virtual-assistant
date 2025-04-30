@@ -1,10 +1,8 @@
 import logging
-import pathlib
 import os.path
-from typing import List, Set, Dict
+from typing import List
 from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
 from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig
-from .varequirementreader import Requirement, RequirementReader, Mappings
 
 
 class AugmentedChatConfig:
