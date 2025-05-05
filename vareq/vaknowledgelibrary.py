@@ -1,4 +1,4 @@
-from typing import List, Set, Dict
+from typing import List
 from enum import Enum
 import logging
 import os.path
@@ -8,7 +8,7 @@ import pdfplumber
 import chromadb
 import langchain_text_splitters
 from .vallminterface import Llm
-from .varequirementreader import Requirement
+from .varequirementreader import Requirement, RequirementReader, Mappings
 
 
 class ItemKind(Enum):
@@ -20,11 +20,13 @@ class KnowledgeLibraryConfig:
     chunk_size: int
     chunk_overlap: int
     persistent_storage_path: str
+    requirement_document_mappings: Mappings
 
     def __init__(self):
         self.chunk_size = 8000
         self.chunk_overlap = 2000
         self.persistent_storage_path = "knowledge_library.db"
+        self.requirement_document_mappings = Mappings()
 
 
 class KnowledgeLibrary:
@@ -51,7 +53,7 @@ class KnowledgeLibrary:
         return "\n".join(lines)
 
     def read_txt(self, file_path: str) -> str:
-        with open(file_path, encoding="utf-8") as file:
+        with open(file_path, mode="rt", encoding="utf-8") as file:
             content = file.read()
             logging.debug(f"Retrieved content: {content}")
             return content
@@ -85,8 +87,8 @@ class KnowledgeLibrary:
         return chunks
 
     def register_document(self, name: str, path: str, timestamp: float, text: str):
-        logging.debug(
-            f"Registering document {name} from path {path} of timestamp {timestamp}"
+        logging.info(
+            f'Registering document "{name}" from path "{path}" of timestamp {timestamp}'
         )
         chunks = self.split_text(text)
         for index, chunk in enumerate(chunks):
@@ -113,6 +115,9 @@ class KnowledgeLibrary:
             return False
         actual_timestamp = os.path.getmtime(path)
         if actual_timestamp > registered_timestamp:
+            logging.info(
+                f'Document "{path}" timestamp changed from {registered_timestamp} to {actual_timestamp}'
+            )
             return False
         # Document is registered, and the timestamp is not in the past
         return True
@@ -120,12 +125,39 @@ class KnowledgeLibrary:
     def add_document(self, path: str, override: bool = False) -> bool:
         if not override:
             if self.is_document_up_to_date(path):
-                logging.debug(f"Document {path} not added, as up-to-date")
+                logging.info(f"Document {path} not added, as up-to-date")
                 return False
         timestamp = os.path.getmtime(path)
         name = pathlib.Path(path).stem
         text = self.read_document(path)
         self.register_document(name, path, timestamp, text)
+        return True
+
+    def is_requirements_document_up_to_date(self, path: str) -> bool:
+        registered_timestamp = self.get_requirements_timestamp()
+        if registered_timestamp < 0:
+            # Document is not registered, so not up to date
+            return False
+        actual_timestamp = os.path.getmtime(path)
+        if actual_timestamp > registered_timestamp:
+            logging.info(
+                f'Document "{path}" timestamp changed from {registered_timestamp} to {actual_timestamp}'
+            )
+            return False
+        # Document is registered, and the timestamp is not in the past
+        return True
+
+    def set_requirements_document(self, path: str, override: bool = False) -> bool:
+        if not override:
+            if self.is_requirements_document_up_to_date(path):
+                logging.info(f"Requirements {path} not added, as up-to-date")
+                return False
+        # Only one source of requirements is supported
+        self.delete_all_requirements()
+        timestamp = os.path.getmtime(path)
+        reader = RequirementReader(self.config.requirement_document_mappings)
+        requirements = reader.read_requirements(path)
+        self.add_requirements(requirements, timestamp)
         return True
 
     def add_directory(self, path: str, override: bool = False) -> int:
@@ -136,20 +168,22 @@ class KnowledgeLibrary:
             extension = path.suffix.lower()
             file_path = str(path)
             logging.debug(
-                f"Adding directory {path}: found file {file_path} with extension {extension}"
+                f'Adding directory "{path}": found file "{file_path}" with extension "{extension}"'
             )
             if extension in extensions:
-                logging.debug(f"Adding file {file_path} from directory {path}")
+                logging.info(f'Adding file "{file_path}" from directory "{path}"')
                 self.add_document(file_path, override)
 
     def delete_all_documents(self):
+        logging.debug(f"Deleting all documents")
         self.documents.delete(where={"type": ItemKind.DOCUMENT.value})
 
     def delete_all_requirements(self):
+        logging.debug(f"Deleting all requirements")
         self.documents.delete(where={"type": ItemKind.REQUIREMENT.value})
 
-    def add_requirement(self, requirement: Requirement):
-        logging.debug(f"Adding requirement {requirement.id}: {requirement.description}")
+    def add_requirement(self, requirement: Requirement, timestamp: float = -1):
+        logging.info(f"Adding requirement {requirement.id}: {requirement.description}")
         text = (
             f"### Requirement {requirement.id}\nDescription: {requirement.description}"
         )
@@ -166,7 +200,7 @@ class KnowledgeLibrary:
                     "path": "",
                     "name": requirement.id,
                     "index": 0,
-                    "timestamp": -1,
+                    "timestamp": timestamp,
                     "type": ItemKind.REQUIREMENT.value,
                 }
             ],
@@ -174,12 +208,24 @@ class KnowledgeLibrary:
             embeddings=embedding,
         )
 
-    def add_requirements(self, requirements: List[Requirement]):
+    def add_requirements(self, requirements: List[Requirement], timestamp: float = -1):
         for requirement in requirements:
-            self.add_requirement(requirement)
+            self.add_requirement(requirement, timestamp)
 
     def get_document_timestamp(self, path) -> float:
         results = self.documents.get(where={"path": path}, include=["metadatas"])
+        metadatas = results["metadatas"]
+        if len(metadatas) == 0:
+            return -1
+        timestamp = metadatas[0]["timestamp"]
+        for meta in metadatas:
+            timestamp = min(timestamp, meta["timestamp"])
+        return timestamp
+
+    def get_requirements_timestamp(self) -> float:
+        results = self.documents.get(
+            where={"type": ItemKind.REQUIREMENT.value}, include=["metadatas"]
+        )
         metadatas = results["metadatas"]
         if len(metadatas) == 0:
             return -1

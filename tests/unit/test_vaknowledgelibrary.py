@@ -13,6 +13,9 @@ logging.basicConfig(level=logging.DEBUG)
 
 
 class FakeLlm(vallminterface.Llm):
+    def __init__(self):
+        pass
+
     def embedding(self, text: str) -> List[float]:
         # Differentiate by length to support fake relevance searches
         result = [len(text), 2, 3, 4]
@@ -21,7 +24,7 @@ class FakeLlm(vallminterface.Llm):
 
 def test_docx_is_read_properly():
     llm = None  # unused
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
     path = os.path.join(RESOURCE_DIR, "test docx.docx")
 
@@ -34,7 +37,7 @@ def test_docx_is_read_properly():
 
 def test_pdf_is_read_properly():
     llm = None  # unused
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
     path = os.path.join(RESOURCE_DIR, "test pdf.pdf")
 
@@ -47,7 +50,7 @@ def test_pdf_is_read_properly():
 
 def test_txt_is_read_properly():
     llm = None  # unused
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
     path = os.path.join(RESOURCE_DIR, "test txt.txt")
 
@@ -60,7 +63,7 @@ def test_txt_is_read_properly():
 
 def test_text_is_split_properly():
     llm = None  # unused
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     config.chunk_size = 1000
     config.chunk_overlap = 100
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
@@ -77,7 +80,7 @@ def test_text_is_split_properly():
 def test_registering_document_works():
     db_path = os.path.join(tempfile.mkdtemp(), "db")
     llm = FakeLlm()
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     config.persistent_storage_path = db_path
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
 
@@ -93,7 +96,7 @@ def test_registering_document_works():
 def test_searching_for_relevant_documents_work():
     db_path = os.path.join(tempfile.mkdtemp(), "db")
     llm = FakeLlm()
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     config.persistent_storage_path = db_path
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
     library.register_document("Test1", "test1.txt", 200, "Car")
@@ -113,7 +116,7 @@ def test_adding_document_works():
     file1.close()
     db_path = os.path.join(tempfile.mkdtemp(), "db")
     llm = FakeLlm()
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     config.persistent_storage_path = db_path
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
 
@@ -128,7 +131,7 @@ def test_adding_document_works():
 def test_adding_directory_works():
     db_path = os.path.join(tempfile.mkdtemp(), "db")
     llm = FakeLlm()
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     config.persistent_storage_path = db_path
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
 
@@ -144,7 +147,7 @@ def test_adding_directory_works():
 def test_deleting_documents_works():
     db_path = os.path.join(tempfile.mkdtemp(), "db")
     llm = FakeLlm()
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     config.persistent_storage_path = db_path
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
     library.register_document("Test1", "test1.txt", 200, "Car")
@@ -160,7 +163,7 @@ def test_deleting_documents_works():
 def test_adding_requirements_works():
     db_path = os.path.join(tempfile.mkdtemp(), "db")
     llm = FakeLlm()
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     config.persistent_storage_path = db_path
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
     req1 = varequirementreader.Requirement("REQ-FUN-12", "It should work")
@@ -177,7 +180,7 @@ def test_adding_requirements_works():
 def test_deleting_requirements_works():
     db_path = os.path.join(tempfile.mkdtemp(), "db")
     llm = FakeLlm()
-    config = vaknowledgelibrary.KnowledgeLibraryConfig()  # default
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
     config.persistent_storage_path = db_path
     library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
     req1 = varequirementreader.Requirement("REQ-FUN-12", "It should work")
@@ -188,3 +191,18 @@ def test_deleting_requirements_works():
 
     docs = library.get_relevant_documents("working", 2)
     assert 0 == len(docs)
+
+
+def test_getting_requirements_timestamp_works():
+    db_path = os.path.join(tempfile.mkdtemp(), "db")
+    llm = FakeLlm()
+    config = vaknowledgelibrary.KnowledgeLibraryConfig()
+    config.persistent_storage_path = db_path
+    library = vaknowledgelibrary.KnowledgeLibrary(llm, config)
+    req1 = varequirementreader.Requirement("REQ-FUN-12", "It should work")
+    req2 = varequirementreader.Requirement("REQ-FUN-30", "It should dance")
+    library.add_requirements([req1, req2], 20.0)
+
+    timestamp = library.get_requirements_timestamp()
+
+    assert 20.0 == timestamp
