@@ -1,9 +1,45 @@
 import logging
 import os.path
-from typing import List
+from typing import List, Dict
+from .varequirementreader import Requirement
 from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
 from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig
 
+class PredefinedQuery:
+    llm : Llm
+    id : str
+    template : str
+
+    def __init__(self, llm : Llm, id : str, template : str):
+        self.id = id
+        self.template = template
+        self.llm = llm
+
+    def process(self, requirement : Requirement) -> str:
+        question = self.template.format(requirement.id,
+                                      requirement.description,
+                                      requirement.note,
+                                      requirement.justification,
+                                      requirement.type,
+                                      requirement.validation_type)
+        reply = self.llm.query(question)
+        return reply
+    
+class PredefinedQueries:
+    queries : Dict[str, PredefinedQuery]
+
+    def __init__(self):
+        self.queries = dict()
+
+    def register(self, query : PredefinedQuery):
+        logging.debug(f"Registering query for ID {query.id}")
+        self.queries[query.id] = query
+
+    def process(self, id : str, requirement : Requirement) -> str:
+        if not id in self.queries.keys:
+            return None
+        query = self.queries[id]
+        return query.process(requirement)
 
 class AugmentedChatConfig:
     max_knowledge_size: int
