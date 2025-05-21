@@ -6,6 +6,7 @@ from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
 from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig
 from .vaqueries import PredefinedQueries, PredefinedQuery
 
+
 class AugmentedChatConfig:
     max_knowledge_size: int
     max_knowledge_items: int
@@ -82,7 +83,7 @@ class EngineConfig:
     lib_config: KnowledgeLibraryConfig
     requirements_file_path: str
     document_directories: List[str]
-    predefined_queries : List[PredefinedQuery]
+    predefined_queries: List[PredefinedQuery]
 
     def __init__(self):
         self.predefined_queries = []
@@ -98,7 +99,7 @@ class Engine:
     llm: Llm
     lib: KnowledgeLibrary
     config: EngineConfig
-    queries : PredefinedQueries
+    queries: PredefinedQueries
 
     def __init__(self, config: EngineConfig):
         self.config = config
@@ -119,6 +120,6 @@ class Engine:
         cfg = AugmentedChatConfig()
         chat = AugmentedChat(self.chat, self.lib, cfg)
         return chat
-    
-    def process_query(self, id : str, requirement : Requirement):
+
+    def process_query(self, id: str, requirement: Requirement):
         return self.queries.process(id, requirement)

@@ -6,6 +6,7 @@ from .varequirementreader import Mappings, RequirementReader
 from .vaqueries import PredefinedQueryReader
 import sys
 
+
 def main():
     """
     The main entry point of Virtual Assistant.
@@ -19,7 +20,9 @@ def main():
     cfg.llm_config.url = "192.168.1.110:11434"
     cfg.llm_config.temperature = 0.2
     cfg.document_directories = ["./"]
-    cfg.predefined_queries = PredefinedQueryReader("./").load_from_file("predefined_queries.json")
+    cfg.predefined_queries = PredefinedQueryReader("./").load_from_file(
+        "predefined_queries.json"
+    )
     # Temporary, to make it compatible with the custom test sheet
     cfg.requirements_file_path = "requirements.xlsx"
     cfg.lib_config.requirement_document_mappings = Mappings().update_from_dict(
@@ -39,7 +42,7 @@ def main():
 
     engine = Engine(cfg)
     # TODO - will be replaced later with a proper CLI
-    if len(sys.argv) == 1: # Chat mode
+    if len(sys.argv) == 1:  # Chat mode
         print("Chat mode")
         chat = engine.get_chat()
         while True:
@@ -57,12 +60,12 @@ def main():
             print(f"-- Reference names: {','.join(reply.reference_names)}")
             print(f"-- User query: {reply.query}")
             print(f"-- System response: {reply.answer}")
-    elif len(sys.argv) == 3: # Predefined queries
+    elif len(sys.argv) == 3:  # Predefined queries
         print("Query mode")
-        mappings = Mappings().update_from_dict(
-            {"worksheet_name": "reqs"}
+        mappings = Mappings().update_from_dict({"worksheet_name": "reqs"})
+        requirements = RequirementReader(mappings).read_requirements(
+            "test_requirements.xlsx"
         )
-        requirements = RequirementReader(mappings).read_requirements("test_requirements.xlsx")
         query_id = sys.argv[1]
         requirement_id = sys.argv[2]
         requirement = next(r for r in requirements if r.id == requirement_id)
@@ -70,7 +73,6 @@ def main():
         print(f"Query result: {reply}")
     else:
         print(f"Wrong number of requirements, unknown mode")
-
 
 
 if __name__ == "__main__":

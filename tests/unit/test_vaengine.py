@@ -71,10 +71,14 @@ def test_chat_knows_documents():
     assert 0 < len(answer.reference_names)
     assert 0 < len(answer.references)
 
+
 def test_engine_can_process_query():
     check_ollama_and_skip()
     cfg = EngineConfig()
-    query = PredefinedQuery("extract","Extract the main subject of the requirement. Do not include the full sentence or any extre explanation, just return the subject. Requirement {0}: {1}\n")
+    query = PredefinedQuery(
+        "extract",
+        "Extract the main subject of the requirement. Do not include the full sentence or any extre explanation, just return the subject. Requirement {0}: {1}\n",
+    )
     cfg.predefined_queries.append(query)
     engine = Engine(cfg)
 
@@ -83,9 +87,13 @@ def test_engine_can_process_query():
 
     assert "dpu" in reply.lower()
 
+
 def test_engine_cannot_process_non_existing_query():
     cfg = EngineConfig()
-    query = PredefinedQuery("extract-id","Extract the main subject of the requirement. Do not include the full sentence or any extre explanation, just return the subject. Requirement {0}: {1}\n")
+    query = PredefinedQuery(
+        "extract-id",
+        "Extract the main subject of the requirement. Do not include the full sentence or any extre explanation, just return the subject. Requirement {0}: {1}\n",
+    )
     cfg.predefined_queries.append(query)
     engine = Engine(cfg)
 
@@ -94,10 +102,11 @@ def test_engine_cannot_process_non_existing_query():
 
     assert reply is None
 
+
 def test_query_can_access_all_requirement_data():
     check_ollama_and_skip()
     cfg = EngineConfig()
-    template = '''
+    template = """
 Return the requirement content without any alterations:
 ### REQUIREMENT
 ID: {0}
@@ -107,7 +116,7 @@ Justification: {3}
 Type: {4}
 Validation: {5}
 Traces: {6}
-'''
+"""
     query = PredefinedQuery("echo", template)
     cfg.predefined_queries.append(query)
     engine = Engine(cfg)
@@ -126,4 +135,4 @@ Traces: {6}
     assert "test" in reply
     assert "br-10" in reply
     assert "br-20" in reply
-    assert "at least 100 ghz" in reply 
+    assert "at least 100 ghz" in reply
