@@ -23,4 +23,7 @@ def test_predefined_query_template_is_rendered():
     queries = reader.load_from_file(os.path.join(RESOURCE_DIR, "predefined_queries.json"))
     template = queries[0].template
 
+    # Check the included file
     assert "1. Each requirement shall use \"shall\"." in template
+    # Check the insertion points for the python format
+    assert "Description: {1}" in template
