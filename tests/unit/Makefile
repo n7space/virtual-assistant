@@ -2,6 +2,7 @@ SRC_DIR = ../../
 PYTHON ?= python3
 
 TESTS = \
+	test_vaqueries.py \
 	test_varequirementreader.py \
 	test_vaknowledgelibrary.py \
 	test_vaengine.py \

@@ -1,0 +1,12 @@
+{
+    "queries" : [
+        {
+            "id" : "review",
+            "query" : "You are an expert requirements engineer working in the aerospace industry. You base your judgements on the following standard:\n<%text>### STANDARD BEGIN</%text>\n<%include file=\"fake_standard.txt\"/>\n<%text>### STANDARD END</%text>\n Provide a concise review of the following requirement:\n ### REQUIREMENT\nID: {0}\nDescription: {1}\nNote: {2}\nJustification: {3}\nType: {4}\nValidation: {5}\nTraces: {6}"
+        },
+        {
+            "id" : "assign-type",
+            "query" : "You are an expert requirements engineer. Assign the given requirement to one of the following types: performance, function or operation. ### REQUIREMENT {1}"
+        }
+    ]
+}

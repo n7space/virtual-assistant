@@ -1,8 +1,10 @@
 import logging
 import os.path
-from typing import List
+from typing import List, Dict
+from .varequirementreader import Requirement
 from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
 from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig
+from .vaqueries import PredefinedQueries, PredefinedQuery
 
 
 class AugmentedChatConfig:
@@ -81,8 +83,10 @@ class EngineConfig:
     lib_config: KnowledgeLibraryConfig
     requirements_file_path: str
     document_directories: List[str]
+    predefined_queries: List[PredefinedQuery]
 
     def __init__(self):
+        self.predefined_queries = []
         self.document_directories = []
         self.requirements_file_path = None
         self.lib_config = KnowledgeLibraryConfig()
@@ -95,12 +99,16 @@ class Engine:
     llm: Llm
     lib: KnowledgeLibrary
     config: EngineConfig
+    queries: PredefinedQueries
 
     def __init__(self, config: EngineConfig):
         self.config = config
         self.llm = Llm(config.llm_config)
         self.chat = Chat(self.llm, config.chat_config)
         self.lib = KnowledgeLibrary(self.llm, self.config.lib_config)
+        self.queries = PredefinedQueries(self.llm)
+        for query in self.config.predefined_queries:
+            self.queries.register(query)
         for directory in self.config.document_directories:
             self.lib.add_directory(directory)
         if self.config.requirements_file_path is not None and os.path.exists(
@@ -112,3 +120,6 @@ class Engine:
         cfg = AugmentedChatConfig()
         chat = AugmentedChat(self.chat, self.lib, cfg)
         return chat
+
+    def process_query(self, id: str, requirement: Requirement):
+        return self.queries.process(id, requirement)

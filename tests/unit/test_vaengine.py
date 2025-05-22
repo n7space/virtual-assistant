@@ -1,6 +1,6 @@
 from vareq.vallminterface import ChatConfig, LlmConfig, Llm
-from vareq.varequirementreader import Mappings
-from vareq.vaengine import Engine, EngineConfig
+from vareq.varequirementreader import Mappings, Requirement
+from vareq.vaengine import Engine, EngineConfig, PredefinedQuery
 import logging
 import pytest
 import os
@@ -70,3 +70,69 @@ def test_chat_knows_documents():
     assert "Universal Army Potato" in answer.answer
     assert 0 < len(answer.reference_names)
     assert 0 < len(answer.references)
+
+
+def test_engine_can_process_query():
+    check_ollama_and_skip()
+    cfg = EngineConfig()
+    query = PredefinedQuery(
+        "extract",
+        "Extract the main subject of the requirement. Do not include the full sentence or any extre explanation, just return the subject. Requirement {0}: {1}\n",
+    )
+    cfg.predefined_queries.append(query)
+    engine = Engine(cfg)
+
+    requirement = Requirement("REQ-10", "The DPU shall be powerful")
+    reply = engine.process_query("extract", requirement)
+
+    assert "dpu" in reply.lower()
+
+
+def test_engine_cannot_process_non_existing_query():
+    cfg = EngineConfig()
+    query = PredefinedQuery(
+        "extract-id",
+        "Extract the main subject of the requirement. Do not include the full sentence or any extre explanation, just return the subject. Requirement {0}: {1}\n",
+    )
+    cfg.predefined_queries.append(query)
+    engine = Engine(cfg)
+
+    requirement = Requirement("REQ-10", "The DPU shall be powerful")
+    reply = engine.process_query("summarize", requirement)
+
+    assert reply is None
+
+
+def test_query_can_access_all_requirement_data():
+    check_ollama_and_skip()
+    cfg = EngineConfig()
+    template = """
+Return the requirement content without any alterations:
+### REQUIREMENT
+ID: {0}
+Description: {1}
+Note: {2}
+Justification: {3}
+Type: {4}
+Validation: {5}
+Traces: {6}
+"""
+    query = PredefinedQuery("echo", template)
+    cfg.predefined_queries.append(query)
+    engine = Engine(cfg)
+
+    requirement = Requirement("REQ-10", "CPU is fast")
+    requirement.note = "Fast is at least 100 GHz"
+    requirement.justification = "Lots of data to process"
+    requirement.validation_type = "Test"
+    requirement.type = "performance"
+    requirement.traces = ["BR-10", "BR-20"]
+    reply = engine.process_query("echo", requirement).lower()
+
+    assert "cpu is fast" in reply
+    assert "lots of data to process" in reply
+    assert "performance" in reply
+    assert "test" in reply
+    assert "br-10" in reply
+    assert "br-20" in reply
+    assert "at least 100 ghz" in reply
