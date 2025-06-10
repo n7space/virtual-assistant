@@ -17,7 +17,7 @@ def remove_think_markers(text: str) -> str:
     if text is None:
         return text
     pattern = re.compile(r"<think>.*?</think>", re.IGNORECASE | re.DOTALL)
-    return pattern.sub("", text)
+    return pattern.sub("", text).strip()
 
 
 def extract_number(text: str) -> float:
