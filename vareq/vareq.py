@@ -15,7 +15,7 @@ def main():
     # TODO - this is a temporary CLI, used only for testing
     cfg = EngineConfig()
     # TODO - for switching between better qwen3 model running on GPU and small qwen2.5 on CPU
-    cfg.llm_config.chat_model_name = "qwen3:4b"
+    cfg.llm_config.chat_model_name = "qwen3:1.7b"
     # cfg.llm_config.chat_model_name = "qwen2.5:0.5b"
     cfg.llm_config.embeddings_model_name = "nomic-embed-text"
     cfg.llm_config.url = None

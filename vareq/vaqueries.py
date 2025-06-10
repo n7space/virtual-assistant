@@ -121,7 +121,11 @@ class PredefinedQueries:
     def process_batch_response(
         self, query: PredefinedQuery, response: List[BatchResponseElement]
     ) -> List[BatchResponseElement]:
-        for element in response:
+        total_requirement_count = len(response)
+        for count, element in enumerate(response, 1):
+            logging.debug(
+                f"Processing requirement {count} of {total_requirement_count}"
+            )
             requirement = element.requirement
             for other in element.context_requirements:
                 logging.debug(
