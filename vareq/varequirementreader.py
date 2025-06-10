@@ -102,5 +102,8 @@ class RequirementReader:
                 )
             else:
                 requirement.traces = []
+            if (requirement.description is None or requirement.id is None):
+                logging.debug(f"Read empty requirement, skipping")
+                continue
             result.append(requirement)
         return result

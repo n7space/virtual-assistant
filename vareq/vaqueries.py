@@ -1,6 +1,8 @@
+from enum import Enum
 from typing import List, Dict
 from .varequirementreader import Requirement
 from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
+from . import helpers
 from mako.template import Template
 from mako.lookup import TemplateLookup
 
@@ -9,14 +11,34 @@ import json
 import os
 
 
+class QueryArity(Enum):
+    UNARY = 1
+    BINARY = 2
+    NARY = 3
+
+class QueryKind(Enum):
+    FREETEXT = 1
+    BINARY = 2
+
 class PredefinedQuery:
     id: str
     template: str
+    arity : QueryArity
+    kind : QueryKind
+    threshold : float
 
-    def __init__(self, id: str, template: str):
+    def __init__(self, kind : QueryKind, arity : QueryArity, id: str, template: str):
         self.id = id
         self.template = template
+        self.kind = kind
+        self.arity = arity
 
+class BatchResponseElement:
+    requirement : Requirement
+    embedding : List[float]
+    applied_requirements : List[Requirement]
+    message : str
+    context_requirements : List[Requirement]
 
 class PredefinedQueries:
     llm: Llm
@@ -36,6 +58,9 @@ class PredefinedQueries:
             return None
         logging.debug(f"Found query for ID {id}")
         query = self.queries[id]
+        if query.arity != QueryArity.UNARY:
+            logging.error(f"Query for ID {id} is not unary, but {query.arity}")
+            return "Query not supported for a single requirement"
         question = query.template.format(
             requirement.id,
             requirement.description,
@@ -50,6 +75,77 @@ class PredefinedQueries:
         logging.debug(f"Query result is: {reply}")
         return reply
 
+    def process_batch(self, id : str, requirements: List[Requirement]) -> List[BatchResponseElement]:
+        if not id in self.queries.keys():
+            logging.error(f"Query for ID {id} not found")
+            return None     
+        query = self.queries[id]
+        if query.arity != QueryArity.NARY:
+            logging.error(f"Query for ID {id} is not nary, but {query.arity}")
+            return List()
+        
+        response = []
+        for requirement in requirements:
+            element = BatchResponseElement()
+            element.requirement = requirement
+            logging.debug(f"Calculating embedding for {requirement.description}")
+            element.embedding = self.llm.embedding(requirement.description)
+            element.applied_requirements = []
+            response.append(element)
+
+        context_size = 3
+        for element in response:
+            similarities = []
+            for other in response:
+                # Do not consider itself
+                if other is element:
+                    continue
+                similarity = helpers.cosine_similarity(element.embedding, other.embedding)
+                similarities.append((similarity, other.requirement))
+            # Sort by similarity - first element of the tuple
+            similarities.sort(reverse=True, key=lambda x: x[0])
+            # Slicing does not raise an error is the list is too short, up to context_size will be returned
+            element.context_requirements = [req for _, req in similarities[:context_size]]
+
+        for element in response:
+            requirement = element.requirement
+            for other in element.context_requirements:
+                logging.debug(f"Processing pair: {requirement.description} and {other.description}")
+                question = query.template.format(
+                    requirement.id,
+                    requirement.description,
+                    requirement.note,
+                    requirement.justification,
+                    requirement.type,
+                    requirement.validation_type,
+                    ",".join(requirement.traces),
+                    other.id,
+                    other.description,
+                    other.note,
+                    other.justification,
+                    other.type,
+                    other.validation_type,
+                    ",".join(other.traces))
+                logging.debug(f"Query got resolved to: {question}")
+                reply = self.llm.query(question)
+                logging.debug(f"Query result is: {reply}")
+                if query.kind == QueryKind.FREETEXT:
+                    # Only a single comparison with the closes requirement
+                    element.applied_requirements.append(other)
+                    break
+                if query.kind == QueryKind.BINARY:
+                    # It is simpler to ask the LLM for estimate than change its sensititivy and try to get a yes/no answer directly
+                    # so an estimate is used; in order to extract properly, we need to ignore the thinking phase (if applicable)
+                    thoughtless_reply = helpers.remove_think_markers(reply)
+                    estimate = helpers.extract_number(thoughtless_reply)
+                    if estimate is None:
+                        continue
+                    if estimate >= query.threshold:
+                        logging.info(f"Detection: {estimate}% for [{requirement.id}:{requirement.description}] and [{other.id}: {other.description}]")
+                        element.applied_requirements.append(other)
+                        element.message = thoughtless_reply
+                        break 
+        return response
 
 class PredefinedQueryReader:
 
@@ -72,10 +168,17 @@ class PredefinedQueryReader:
         lookup = TemplateLookup(directories=[".", self.base_directory])
         for query_data in data["queries"]:
             id = query_data["id"]
+            arity = QueryArity[query_data["arity"].upper()]
+            kind = QueryKind[query_data["kind"].upper()]
+            if kind == QueryKind.BINARY:
+                threshold = query_data["threshold"]
+            else:
+                threshold = None
             query_template = query_data["query"]
             logging.debug(f"Read query ID {id} with template {query_template}")
             template = Template(text=query_template, lookup=lookup)
             rendered_template = template.render()
-            query = PredefinedQuery(id, rendered_template)
+            query = PredefinedQuery(kind, arity, id, rendered_template)
+            query.threshold = threshold
             queries.append(query)
         return queries

@@ -4,7 +4,7 @@ from typing import List, Dict
 from .varequirementreader import Requirement
 from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
 from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig
-from .vaqueries import PredefinedQueries, PredefinedQuery
+from .vaqueries import PredefinedQueries, PredefinedQuery, BatchResponseElement
 
 
 class AugmentedChatConfig:
@@ -121,5 +121,8 @@ class Engine:
         chat = AugmentedChat(self.chat, self.lib, cfg)
         return chat
 
-    def process_query(self, id: str, requirement: Requirement):
+    def process_query(self, id: str, requirement: Requirement) -> str:
         return self.queries.process(id, requirement)
+    
+    def process_batch_query(self, id: str, requirements: List[Requirement]) -> List[BatchResponseElement]:
+        return self.queries.process_batch(id, requirements)
