@@ -1,6 +1,7 @@
 from vareq.vallminterface import ChatConfig, LlmConfig, Llm
 from vareq.varequirementreader import Mappings, Requirement
 from vareq.vaengine import Engine, EngineConfig, PredefinedQuery
+from vareq.vaqueries import QueryArity, QueryKind
 import logging
 import pytest
 import os
@@ -91,6 +92,8 @@ def test_engine_can_process_query():
 def test_engine_cannot_process_non_existing_query():
     cfg = EngineConfig()
     query = PredefinedQuery(
+        QueryKind.FREETEXT,
+        QueryArity.UNARY,
         "extract-id",
         "Extract the main subject of the requirement. Do not include the full sentence or any extre explanation, just return the subject. Requirement {0}: {1}\n",
     )
