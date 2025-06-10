@@ -123,6 +123,8 @@ class Engine:
 
     def process_query(self, id: str, requirement: Requirement) -> str:
         return self.queries.process(id, requirement)
-    
-    def process_batch_query(self, id: str, requirements: List[Requirement]) -> List[BatchResponseElement]:
+
+    def process_batch_query(
+        self, id: str, requirements: List[Requirement]
+    ) -> List[BatchResponseElement]:
         return self.queries.process_batch(id, requirements)

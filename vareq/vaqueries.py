@@ -16,29 +16,33 @@ class QueryArity(Enum):
     BINARY = 2
     NARY = 3
 
+
 class QueryKind(Enum):
     FREETEXT = 1
     BINARY = 2
 
+
 class PredefinedQuery:
     id: str
     template: str
-    arity : QueryArity
-    kind : QueryKind
-    threshold : float
+    arity: QueryArity
+    kind: QueryKind
+    threshold: float
 
-    def __init__(self, kind : QueryKind, arity : QueryArity, id: str, template: str):
+    def __init__(self, kind: QueryKind, arity: QueryArity, id: str, template: str):
         self.id = id
         self.template = template
         self.kind = kind
         self.arity = arity
 
+
 class BatchResponseElement:
-    requirement : Requirement
-    embedding : List[float]
-    applied_requirements : List[Requirement]
-    message : str
-    context_requirements : List[Requirement]
+    requirement: Requirement
+    embedding: List[float]
+    applied_requirements: List[Requirement]
+    message: str
+    context_requirements: List[Requirement]
+
 
 class PredefinedQueries:
     llm: Llm
@@ -75,15 +79,17 @@ class PredefinedQueries:
         logging.debug(f"Query result is: {reply}")
         return reply
 
-    def process_batch(self, id : str, requirements: List[Requirement]) -> List[BatchResponseElement]:
+    def process_batch(
+        self, id: str, requirements: List[Requirement]
+    ) -> List[BatchResponseElement]:
         if not id in self.queries.keys():
             logging.error(f"Query for ID {id} not found")
-            return None     
+            return None
         query = self.queries[id]
         if query.arity != QueryArity.NARY:
             logging.error(f"Query for ID {id} is not nary, but {query.arity}")
             return List()
-        
+
         response = []
         for requirement in requirements:
             element = BatchResponseElement()
@@ -100,17 +106,23 @@ class PredefinedQueries:
                 # Do not consider itself
                 if other is element:
                     continue
-                similarity = helpers.cosine_similarity(element.embedding, other.embedding)
+                similarity = helpers.cosine_similarity(
+                    element.embedding, other.embedding
+                )
                 similarities.append((similarity, other.requirement))
             # Sort by similarity - first element of the tuple
             similarities.sort(reverse=True, key=lambda x: x[0])
             # Slicing does not raise an error is the list is too short, up to context_size will be returned
-            element.context_requirements = [req for _, req in similarities[:context_size]]
+            element.context_requirements = [
+                req for _, req in similarities[:context_size]
+            ]
 
         for element in response:
             requirement = element.requirement
             for other in element.context_requirements:
-                logging.debug(f"Processing pair: {requirement.description} and {other.description}")
+                logging.debug(
+                    f"Processing pair: {requirement.description} and {other.description}"
+                )
                 question = query.template.format(
                     requirement.id,
                     requirement.description,
@@ -125,7 +137,8 @@ class PredefinedQueries:
                     other.justification,
                     other.type,
                     other.validation_type,
-                    ",".join(other.traces))
+                    ",".join(other.traces),
+                )
                 logging.debug(f"Query got resolved to: {question}")
                 reply = self.llm.query(question)
                 logging.debug(f"Query result is: {reply}")
@@ -141,11 +154,14 @@ class PredefinedQueries:
                     if estimate is None:
                         continue
                     if estimate >= query.threshold:
-                        logging.info(f"Detection: {estimate}% for [{requirement.id}:{requirement.description}] and [{other.id}: {other.description}]")
+                        logging.info(
+                            f"Detection: {estimate}% for [{requirement.id}:{requirement.description}] and [{other.id}: {other.description}]"
+                        )
                         element.applied_requirements.append(other)
                         element.message = thoughtless_reply
-                        break 
+                        break
         return response
+
 
 class PredefinedQueryReader:
 

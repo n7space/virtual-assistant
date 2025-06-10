@@ -15,11 +15,11 @@ def main():
     # TODO - this is a temporary CLI, used only for testing
     cfg = EngineConfig()
     cfg.llm_config.chat_model_name = "qwen3:4b"
-    #cfg.llm_config.chat_model_name = "qwen2.5:0.5b"
-    #cfg.llm_config.chat_model_name = "qwen2.5:1.5b-instruct-q8_0"
+    # cfg.llm_config.chat_model_name = "qwen2.5:0.5b"
+    # cfg.llm_config.chat_model_name = "qwen2.5:1.5b-instruct-q8_0"
     cfg.llm_config.embeddings_model_name = "nomic-embed-text"
     # TODO - temporary setup, a more powerful LLM is executed on a remote computer
-    #cfg.llm_config.url = "192.168.1.110:11434"
+    # cfg.llm_config.url = "192.168.1.110:11434"
     cfg.llm_config.url = None
     cfg.llm_config.temperature = 0.2
     cfg.document_directories = ["./"]
@@ -73,12 +73,17 @@ def main():
         reply = engine.process_batch_query(query_id, requirements)
         print(f"Query result:")
         for element in reply:
-            if len(element.applied_requirements) > 0 and element.message is not None and len(element.message) > 0:
+            if (
+                len(element.applied_requirements) > 0
+                and element.message is not None
+                and len(element.message) > 0
+            ):
                 requirement = element.requirement
-                other = element.applied_requirements[0] 
-                print(f"Detection: [{requirement.id}:{requirement.description}] and [{other.id}: {other.description}] - {element.message}")
-                        
-        
+                other = element.applied_requirements[0]
+                print(
+                    f"Detection: [{requirement.id}:{requirement.description}] and [{other.id}: {other.description}] - {element.message}"
+                )
+
     elif len(sys.argv) == 3:  # Predefined queries
         print("Query mode - single requirement")
         mappings = Mappings().update_from_dict({"worksheet_name": "reqs"})
