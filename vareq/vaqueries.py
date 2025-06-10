@@ -47,10 +47,12 @@ class BatchResponseElement:
 class PredefinedQueries:
     llm: Llm
     queries: Dict[str, PredefinedQuery]
+    batch_query_context_size: int
 
     def __init__(self, llm: Llm):
         self.queries = dict()
         self.llm = llm
+        self.batch_query_context_size = 3
 
     def register(self, query: PredefinedQuery):
         logging.debug(f"Registering query for ID {query.id}")
@@ -79,17 +81,9 @@ class PredefinedQueries:
         logging.debug(f"Query result is: {reply}")
         return reply
 
-    def process_batch(
-        self, id: str, requirements: List[Requirement]
+    def initialize_batch_response(
+        self, requirements: List[Requirement]
     ) -> List[BatchResponseElement]:
-        if not id in self.queries.keys():
-            logging.error(f"Query for ID {id} not found")
-            return None
-        query = self.queries[id]
-        if query.arity != QueryArity.NARY:
-            logging.error(f"Query for ID {id} is not nary, but {query.arity}")
-            return List()
-
         response = []
         for requirement in requirements:
             element = BatchResponseElement()
@@ -99,7 +93,6 @@ class PredefinedQueries:
             element.applied_requirements = []
             response.append(element)
 
-        context_size = 3
         for element in response:
             similarities = []
             for other in response:
@@ -114,9 +107,13 @@ class PredefinedQueries:
             similarities.sort(reverse=True, key=lambda x: x[0])
             # Slicing does not raise an error is the list is too short, up to context_size will be returned
             element.context_requirements = [
-                req for _, req in similarities[:context_size]
+                req for _, req in similarities[: self.batch_query_context_size]
             ]
+        return response
 
+    def process_batch_response(
+        self, query: str, response: List[BatchResponseElement]
+    ) -> List[BatchResponseElement]:
         for element in response:
             requirement = element.requirement
             for other in element.context_requirements:
@@ -160,6 +157,21 @@ class PredefinedQueries:
                         element.applied_requirements.append(other)
                         element.message = thoughtless_reply
                         break
+        return response
+
+    def process_batch(
+        self, id: str, requirements: List[Requirement]
+    ) -> List[BatchResponseElement]:
+        if not id in self.queries.keys():
+            logging.error(f"Query for ID {id} not found")
+            return None
+        query = self.queries[id]
+        if query.arity != QueryArity.NARY:
+            logging.error(f"Query for ID {id} is not nary, but {query.arity}")
+            return List()
+
+        response = self.initialize_batch_response(requirements)
+        response = self.process_batch_response(query, response)
         return response
 
 
