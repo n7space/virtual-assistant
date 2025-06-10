@@ -15,11 +15,9 @@ class LlmConfig:
     temperature: float
 
     def __init__(self):
-        self.chat_model_name = "qwen2.5:1.5b-instruct-q8_0"
+        self.chat_model_name = "qwen2.5:0.5b"
         self.embeddings_model_name = "nomic-embed-text"
-        # self.url = "192.168.1.110:11434"
-        # self.url = "127.0.0.1:11434"
-        self.url = None
+        self.url = "127.0.0.1:11434"
         self.temperature = 0.8
 
 

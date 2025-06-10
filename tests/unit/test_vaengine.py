@@ -77,6 +77,8 @@ def test_engine_can_process_query():
     check_ollama_and_skip()
     cfg = EngineConfig()
     query = PredefinedQuery(
+        QueryKind.FREETEXT,
+        QueryArity.UNARY,
         "extract",
         "Extract the main subject of the requirement. Do not include the full sentence or any extre explanation, just return the subject. Requirement {0}: {1}\n",
     )
@@ -120,7 +122,7 @@ Type: {4}
 Validation: {5}
 Traces: {6}
 """
-    query = PredefinedQuery("echo", template)
+    query = PredefinedQuery(QueryKind.FREETEXT, QueryArity.UNARY, "echo", template)
     cfg.predefined_queries.append(query)
     engine = Engine(cfg)
 
