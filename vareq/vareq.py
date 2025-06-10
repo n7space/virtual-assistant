@@ -14,12 +14,10 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     # TODO - this is a temporary CLI, used only for testing
     cfg = EngineConfig()
+    # TODO - for switching between better qwen3 model running on GPU and small qwen2.5 on CPU
     cfg.llm_config.chat_model_name = "qwen3:4b"
     # cfg.llm_config.chat_model_name = "qwen2.5:0.5b"
-    # cfg.llm_config.chat_model_name = "qwen2.5:1.5b-instruct-q8_0"
     cfg.llm_config.embeddings_model_name = "nomic-embed-text"
-    # TODO - temporary setup, a more powerful LLM is executed on a remote computer
-    # cfg.llm_config.url = "192.168.1.110:11434"
     cfg.llm_config.url = None
     cfg.llm_config.temperature = 0.2
     cfg.document_directories = ["./"]
