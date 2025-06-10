@@ -34,6 +34,7 @@ class PredefinedQuery:
         self.template = template
         self.kind = kind
         self.arity = arity
+        self.threshold = 0 if self.kind == QueryKind.BINARY else None
 
 
 class BatchResponseElement:
@@ -42,6 +43,13 @@ class BatchResponseElement:
     applied_requirements: List[Requirement]
     message: str
     context_requirements: List[Requirement]
+
+    def __init__(self):
+        self.requirement = None
+        self.message = None
+        self.embedding = []
+        self.context_requirements = []
+        self.applied_requirements = []
 
 
 class PredefinedQueries:
@@ -90,7 +98,6 @@ class PredefinedQueries:
             element.requirement = requirement
             logging.debug(f"Calculating embedding for {requirement.description}")
             element.embedding = self.llm.embedding(requirement.description)
-            element.applied_requirements = []
             response.append(element)
 
         for element in response:
@@ -112,7 +119,7 @@ class PredefinedQueries:
         return response
 
     def process_batch_response(
-        self, query: str, response: List[BatchResponseElement]
+        self, query: PredefinedQuery, response: List[BatchResponseElement]
     ) -> List[BatchResponseElement]:
         for element in response:
             requirement = element.requirement
@@ -139,14 +146,15 @@ class PredefinedQueries:
                 logging.debug(f"Query got resolved to: {question}")
                 reply = self.llm.query(question)
                 logging.debug(f"Query result is: {reply}")
+                thoughtless_reply = helpers.remove_think_markers(reply)
                 if query.kind == QueryKind.FREETEXT:
                     # Only a single comparison with the closes requirement
                     element.applied_requirements.append(other)
+                    element.message = thoughtless_reply
                     break
-                if query.kind == QueryKind.BINARY:
+                elif query.kind == QueryKind.BINARY:
                     # It is simpler to ask the LLM for estimate than change its sensititivy and try to get a yes/no answer directly
                     # so an estimate is used; in order to extract properly, we need to ignore the thinking phase (if applicable)
-                    thoughtless_reply = helpers.remove_think_markers(reply)
                     estimate = helpers.extract_number(thoughtless_reply)
                     if estimate is None:
                         continue
@@ -168,7 +176,7 @@ class PredefinedQueries:
         query = self.queries[id]
         if query.arity != QueryArity.NARY:
             logging.error(f"Query for ID {id} is not nary, but {query.arity}")
-            return List()
+            return None
 
         response = self.initialize_batch_response(requirements)
         response = self.process_batch_response(query, response)
