@@ -1,4 +1,4 @@
-from vareq.vaqueries import PredefinedQueryReader
+from vareq.vaqueries import PredefinedQueryReader, QueryKind, QueryArity
 import logging
 import pytest
 import os
@@ -16,9 +16,17 @@ def test_predefined_queries_are_read():
     )
 
     assert not queries is None
-    assert 2 == len(queries)
+    assert 3 == len(queries)
     assert "review" == queries[0].id
+    assert QueryArity.UNARY == queries[0].arity
+    assert QueryKind.FREETEXT == queries[0].kind
     assert "assign-type" == queries[1].id
+    assert QueryArity.UNARY == queries[1].arity
+    assert QueryKind.FREETEXT == queries[1].kind
+    assert "multi" == queries[2].id
+    assert QueryArity.NARY == queries[2].arity
+    assert QueryKind.BINARY == queries[2].kind
+    assert 50 == queries[2].threshold
 
 
 def test_predefined_query_template_is_rendered():

@@ -11,6 +11,13 @@
             "arity" : "unary",
             "kind" : "freetext",
             "query" : "You are an expert requirements engineer. Assign the given requirement to one of the following types: performance, function or operation. ### REQUIREMENT {1}"
+        },
+        {
+            "id" : "multi",
+            "arity" : "nary",
+            "kind" : "binary",
+            "threshold" : 50.0,
+            "query" : "Test nary template"
         }
     ]
 }
