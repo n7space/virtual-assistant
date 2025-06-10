@@ -170,7 +170,7 @@ class PredefinedQueries:
     def process_batch(
         self, id: str, requirements: List[Requirement]
     ) -> List[BatchResponseElement]:
-        if not id in self.queries.keys():
+        if id not in self.queries:
             logging.error(f"Query for ID {id} not found")
             return None
         query = self.queries[id]
