@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Dict
+from typing import List, Dict, Optional
 from .varequirementreader import Requirement
 from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
 from . import helpers
@@ -118,10 +118,24 @@ class PredefinedQueries:
             ]
         return response
 
+    def find_existing_result(
+        self,
+        response: List[BatchResponseElement],
+        requirement_1: Requirement,
+        requirement_2: Requirement,
+    ) -> Optional[str]:
+        for element in response:
+            if element.requirement == requirement_1:
+                for applied_requirement in element.applied_requirements:
+                    if applied_requirement == requirement_2:
+                        return element.message
+        return None
+
     def process_batch_response(
         self, query: PredefinedQuery, response: List[BatchResponseElement]
     ) -> List[BatchResponseElement]:
         total_requirement_count = len(response)
+        pairs = {}
         for count, element in enumerate(response, 1):
             logging.debug(
                 f"Processing requirement {count} of {total_requirement_count}"
@@ -131,6 +145,24 @@ class PredefinedQueries:
                 logging.debug(
                     f"Processing pair: {requirement.description} and {other.description}"
                 )
+                if (requirement, other) in pairs:
+                    # Query was already executed (for a different order)
+                    logging.debug(
+                        f"Skipping query for {requirement.id} and {other.id} [already done in reverse]"
+                    )
+                    existing_result = self.find_existing_result(
+                        response, other, requirement
+                    )
+                    if existing_result:
+                        logging.debug(
+                            f"Reusing positive result for {requirement.id} and {other.id}"
+                        )
+                        element.applied_requirements.append(other)
+                        element.message = existing_result
+                    break
+                # Do not query again
+                pairs[(requirement, other)] = True
+                pairs[(other, requirement)] = True
                 question = query.template.format(
                     requirement.id,
                     requirement.description,
