@@ -1,9 +1,9 @@
 import logging
 import os.path
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from .varequirementreader import Requirement
 from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
-from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig
+from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig, ItemKind
 from .vaqueries import PredefinedQueries, PredefinedQuery, BatchResponseElement
 
 
@@ -27,13 +27,17 @@ class AugmentedChat:
     llm_chat: Chat
     lib: KnowledgeLibrary
     config: AugmentedChatConfig
+    use_requirements: bool
+    use_documents: bool
 
     def __init__(self, chat: Chat, lib: KnowledgeLibrary, config: AugmentedChatConfig):
         self.config = config
         self.llm_chat = chat
         self.lib = lib
+        self.use_requirements = True
+        self.use_documents = True
 
-    def get_relevant_documents(self, query: str) -> List[str]:
+    def get_relevant_documents(self, query: str) -> List[Tuple[str, ItemKind, str]]:
         documents = self.lib.get_relevant_documents(
             query, self.config.max_knowledge_items
         )
@@ -43,7 +47,11 @@ class AugmentedChat:
         logging.debug(f"Found {len(documents)} relevant documents")
         total_size = 0
         total_count = 0
-        for document in documents:
+        for (_, item_kind, document) in documents:
+            if item_kind == ItemKind.DOCUMENT and not self.use_documents:
+                continue
+            if item_kind == ItemKind.REQUIREMENT and not self.use_requirements:
+                continue
             size = len(document)
             total_size = total_size + size
             total_count = total_count + 1
@@ -68,10 +76,14 @@ class AugmentedChat:
         reply.query = query
         documents = self.get_relevant_documents(query)
         documents_count = len(documents)
-        reply.references = documents
-        reply.reference_names = [self.extract_reference_name(x) for x in documents]
+        reply.references = [document for (_, _, document) in documents]
+        reply.reference_names = [name for (name, _, _) in documents]
         documents.reverse()  # The least relevant in the beggining (LLM may forget that)
-        context = "\n".join(documents) if documents_count > 0 else ""
+        context = (
+            "\n".join([document for (_, _, document) in documents])
+            if documents_count > 0
+            else ""
+        )
         answer = self.llm_chat.chat(context, query)
         reply.answer = answer
         return reply
@@ -81,6 +93,7 @@ class EngineConfig:
     llm_config: LlmConfig
     chat_config: ChatConfig
     lib_config: KnowledgeLibraryConfig
+    batch_query_context_size: int
     requirements_file_path: str
     document_directories: List[str]
     predefined_queries: List[PredefinedQuery]
@@ -92,6 +105,7 @@ class EngineConfig:
         self.lib_config = KnowledgeLibraryConfig()
         self.llm_config = LlmConfig()
         self.chat_config = ChatConfig()
+        self.batch_query_context_size = 3
 
 
 class Engine:
@@ -107,6 +121,7 @@ class Engine:
         self.chat = Chat(self.llm, config.chat_config)
         self.lib = KnowledgeLibrary(self.llm, self.config.lib_config)
         self.queries = PredefinedQueries(self.llm)
+        self.queries.batch_query_context_size = config.batch_query_context_size
         for query in self.config.predefined_queries:
             self.queries.register(query)
         for directory in self.config.document_directories:

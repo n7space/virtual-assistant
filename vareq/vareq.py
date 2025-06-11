@@ -30,21 +30,25 @@ def main():
         "predefined_queries.json"
     )
     # Temporary, to make it compatible with the custom test sheet
-    cfg.requirements_file_path = "requirements.xlsx"
     cfg.lib_config.requirement_document_mappings = Mappings().update_from_dict(
-        {
-            "worksheet_name": "Requirements",
-            "first_row_number": 2,
-            "id": "D",
-            "type": "",
-            "validation_type": "I",
-            "description": "E",
-            "note": "F",
-            "justification": "G",
-            "traces": "H",
-            "trace_separator": ",",
-        }
+        {"worksheet_name": "reqs"}
     )
+    cfg.requirements_file_path = "test_requirements.xlsx"
+    # cfg.requirements_file_path = "requirements.xlsx"
+    # cfg.lib_config.requirement_document_mappings = Mappings().update_from_dict(
+    #    {
+    #        "worksheet_name": "Requirements",
+    #        "first_row_number": 2,
+    #        "id": "D",
+    #        "type": "",
+    #        "validation_type": "I",
+    #        "description": "E",
+    #        "note": "F",
+    #        "justification": "G",
+    #        "traces": "H",
+    #        "trace_separator": ",",
+    #    }
+    # )
 
     engine = Engine(cfg)
     # TODO - will be replaced later with a proper CLI

@@ -106,8 +106,8 @@ def test_searching_for_relevant_documents_work():
     docs = library.get_relevant_documents("Car", 2)
 
     assert 2 == len(docs)
-    assert "### Document Test1 part 0\nCar" == docs[0]
-    assert "### Document Test3 part 0\nMoto" == docs[1]
+    assert "### Document Test1 part 0\nCar" == docs[0][2]
+    assert "### Document Test3 part 0\nMoto" == docs[1][2]
 
 
 def test_adding_document_works():
@@ -124,7 +124,7 @@ def test_adding_document_works():
 
     docs = library.get_relevant_documents("Cats", 1)
     assert 1 == len(docs)
-    assert "awesome" in docs[0]
+    assert "awesome" in docs[0][2]
     assert added
 
 
