@@ -47,7 +47,7 @@ def test_predefined_queries_are_read():
     )
 
     assert not queries is None
-    assert 3 == len(queries)
+    assert 4 == len(queries)
     assert "review" == queries[0].id
     assert QueryArity.UNARY == queries[0].arity
     assert QueryKind.FREETEXT == queries[0].kind
@@ -58,6 +58,10 @@ def test_predefined_queries_are_read():
     assert QueryArity.NARY == queries[2].arity
     assert QueryKind.BINARY == queries[2].kind
     assert 50 == queries[2].threshold
+    assert "check" == queries[3].id
+    assert QueryArity.UNARY == queries[3].arity
+    assert QueryKind.BINARY == queries[3].kind
+    assert 75 == queries[3].threshold
 
 
 def test_predefined_query_template_is_rendered():
@@ -102,6 +106,28 @@ def test_process_batch_response_handles_freetext_query():
     for element in result:
         assert 1 == len(element.applied_requirements)
         assert "Some reply" == element.message
+
+
+def test_process_handles_binary_query_over_threshold():
+    llm = LlmMock(query_return="80")
+    queries = PredefinedQueries(llm)
+    query = PredefinedQuery(QueryKind.BINARY, QueryArity.UNARY, "id", "{0} {1}")
+    query.threshold = 50
+    queries.register(query)
+    requirement = create_requirement("REQ-10", "Description A")
+    result = queries.process("id", requirement)
+    assert "true" == result.lower()
+
+
+def test_process_handles_binary_query_under_threshold():
+    llm = LlmMock(query_return="80")
+    queries = PredefinedQueries(llm)
+    query = PredefinedQuery(QueryKind.BINARY, QueryArity.UNARY, "id", "{0} {1}")
+    query.threshold = 90
+    queries.register(query)
+    requirement = create_requirement("REQ-10", "Description A")
+    result = queries.process("id", requirement)
+    assert "false" == result.lower()
 
 
 def test_process_batch_response_handles_binary_query_over_threshold():

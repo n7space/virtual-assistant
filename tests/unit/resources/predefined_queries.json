@@ -18,6 +18,13 @@
             "kind" : "binary",
             "threshold" : 50.0,
             "query" : "Test nary template"
+        },
+        {
+            "id" : "check",
+            "arity" : "unary",
+            "kind" : "binary",
+            "threshold" : 75.0,
+            "query" : "Estimate, in range 0-100, whether the requirement {1} makes sense"
         }
     ]
 }

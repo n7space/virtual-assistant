@@ -87,6 +87,16 @@ class PredefinedQueries:
         logging.debug(f"Query got resolved to: {question}")
         reply = self.llm.query(question)
         logging.debug(f"Query result is: {reply}")
+        if query.kind == QueryKind.BINARY:
+            # It is simpler to ask the LLM for estimate than change its sensititivy and try to get a yes/no answer directly
+            # so an estimate is used; in order to extract properly, we need to ignore the thinking phase (if applicable)
+            thoughtless_reply = helpers.remove_think_markers(reply)
+            estimate = helpers.extract_number(thoughtless_reply)
+            if estimate is None:
+                return "False"
+            if estimate >= query.threshold:
+                return "True"
+            return "False"
         return reply
 
     def initialize_batch_response(
