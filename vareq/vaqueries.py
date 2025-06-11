@@ -66,6 +66,12 @@ class PredefinedQueries:
         logging.debug(f"Registering query for ID {query.id}")
         self.queries[query.id] = query
 
+    def arity(self, id: str) -> QueryArity:
+        if not id in self.queries.keys():
+            return None
+        query = self.queries[id]
+        return query.arity
+
     def process(self, id: str, requirement: Requirement) -> str:
         if not id in self.queries.keys():
             logging.error(f"Query for ID {id} not found")

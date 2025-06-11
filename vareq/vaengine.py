@@ -4,16 +4,25 @@ from typing import List, Dict, Tuple
 from .varequirementreader import Requirement
 from .vallminterface import Llm, Chat, LlmConfig, ChatConfig
 from .vaknowledgelibrary import KnowledgeLibrary, KnowledgeLibraryConfig, ItemKind
-from .vaqueries import PredefinedQueries, PredefinedQuery, BatchResponseElement
+from .vaqueries import (
+    PredefinedQueries,
+    PredefinedQuery,
+    BatchResponseElement,
+    QueryArity,
+)
 
 
 class AugmentedChatConfig:
     max_knowledge_size: int
     max_knowledge_items: int
+    use_requirements: bool
+    use_documents: bool
 
     def __init__(self):
         self.max_knowledge_items = 64
         self.max_knowledge_size = 16384
+        self.use_requirements = True
+        self.use_documents = True
 
 
 class AugmentedChatReply:
@@ -27,15 +36,11 @@ class AugmentedChat:
     llm_chat: Chat
     lib: KnowledgeLibrary
     config: AugmentedChatConfig
-    use_requirements: bool
-    use_documents: bool
 
     def __init__(self, chat: Chat, lib: KnowledgeLibrary, config: AugmentedChatConfig):
         self.config = config
         self.llm_chat = chat
         self.lib = lib
-        self.use_requirements = True
-        self.use_documents = True
 
     def get_relevant_documents(self, query: str) -> List[Tuple[str, ItemKind, str]]:
         documents = self.lib.get_relevant_documents(
@@ -48,9 +53,9 @@ class AugmentedChat:
         total_size = 0
         total_count = 0
         for (_, item_kind, document) in documents:
-            if item_kind == ItemKind.DOCUMENT and not self.use_documents:
+            if item_kind == ItemKind.DOCUMENT and not self.config.use_documents:
                 continue
-            if item_kind == ItemKind.REQUIREMENT and not self.use_requirements:
+            if item_kind == ItemKind.REQUIREMENT and not self.config.use_requirements:
                 continue
             size = len(document)
             total_size = total_size + size
@@ -134,7 +139,7 @@ class Engine:
             self.lib.set_requirements_document(self.config.requirements_file_path)
 
     def get_chat(self) -> AugmentedChat:
-        chat = AugmentedChat(self.chat, self.lib, self.augmented_chat_config)
+        chat = AugmentedChat(self.chat, self.lib, self.config.augmented_chat_config)
         return chat
 
     def process_query(self, id: str, requirement: Requirement) -> str:
@@ -144,3 +149,9 @@ class Engine:
         self, id: str, requirements: List[Requirement]
     ) -> List[BatchResponseElement]:
         return self.queries.process_batch(id, requirements)
+
+    def get_query_arity(self, id: str) -> QueryArity:
+        return self.queries.arity(id)
+
+    def get_config(self) -> EngineConfig:
+        return self.config

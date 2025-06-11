@@ -15,9 +15,9 @@ class LlmConfig:
     temperature: float
 
     def __init__(self):
-        self.chat_model_name = "qwen2.5:0.5b"
+        self.chat_model_name = "qwen3:0.6b"
         self.embeddings_model_name = "nomic-embed-text"
-        self.url = "127.0.0.1:11434"
+        self.url = None
         self.temperature = 0.8
 
 
@@ -65,7 +65,8 @@ class Llm:
 
     def is_available(self) -> bool:
         try:
-            response = requests.get(f"http://{self.url}/api/tags")
+            url = self.url or "127.0.0.1:11434"
+            response = requests.get(f"http://{url}/api/tags")
             return response.status_code == 200
         except:
             return False

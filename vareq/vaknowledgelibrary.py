@@ -39,9 +39,12 @@ class KnowledgeLibrary:
         self.llm = llm
         self.config = config
         self.persistent_db = chromadb.PersistentClient(
-            path=config.persistent_storage_path
+            path=config.persistent_storage_path,
+            settings=chromadb.Settings(anonymized_telemetry=False),
         )
-        self.documents = self.persistent_db.get_or_create_collection(name="documents")
+        self.documents = self.persistent_db.get_or_create_collection(
+            name="documents", metadata={"hnsw:space": "cosine"}
+        )
 
     def read_docx(self, file_path: str) -> str:
         lines = []
