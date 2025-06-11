@@ -92,6 +92,7 @@ class AugmentedChat:
 class EngineConfig:
     llm_config: LlmConfig
     chat_config: ChatConfig
+    augmented_chat_config: AugmentedChatConfig
     lib_config: KnowledgeLibraryConfig
     batch_query_context_size: int
     requirements_file_path: str
@@ -105,6 +106,7 @@ class EngineConfig:
         self.lib_config = KnowledgeLibraryConfig()
         self.llm_config = LlmConfig()
         self.chat_config = ChatConfig()
+        self.augmented_chat_config = AugmentedChatConfig()
         self.batch_query_context_size = 3
 
 
@@ -132,8 +134,7 @@ class Engine:
             self.lib.set_requirements_document(self.config.requirements_file_path)
 
     def get_chat(self) -> AugmentedChat:
-        cfg = AugmentedChatConfig()
-        chat = AugmentedChat(self.chat, self.lib, cfg)
+        chat = AugmentedChat(self.chat, self.lib, self.augmented_chat_config)
         return chat
 
     def process_query(self, id: str, requirement: Requirement) -> str:
