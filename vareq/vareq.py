@@ -290,7 +290,7 @@ def main():
         logging.info("Dumping configuration")
         return handle_dump_config(cfg)
     else:
-        print(f"Unkown mode")
+        print(f"Unknown mode")
         return -1
 
 
