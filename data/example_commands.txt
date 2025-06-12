@@ -1,12 +1,34 @@
 # Override default config using JSON in the command line, so that documents are not used in the chat
-vareq --mode dump-config --config-json "{\"augmented_chat_config\": {\"use_documents\": false,\"use_requirements\": true}}"
+vareq --mode dump-config \
+    --config-json "{\"augmented_chat_config\": {\"use_documents\": false,\"use_requirements\": true}}"
+
 # Override default config using JSON in the command line, so that specific model is used
-vareq --mode dump-config --config-json "{\"llm_config\": {\"chat_model_name\": \"tinyllama:latest\"}}"
+vareq --mode dump-config \
+    --config-json "{\"llm_config\": {\"chat_model_name\": \"tinyllama:latest\"}}"
+
 # Start chat, printing info logs, only about requirements in "requirements.xlsx", using qwen3:1.7b
-vareq --mode chat --verbosity info --config-json "{\"llm_config\": {\"chat_model_name\": \"qwen3:1.7b\"}, \"augmented_chat_config\": {\"use_documents\": false,\"use_requirements\": true}}" --requirements "requirements.xlsx"
+vareq --mode chat \
+    --verbosity info \
+    --config-json "{\"llm_config\": {\"chat_model_name\": \"qwen3:1.7b\"}, \"augmented_chat_config\": {\"use_documents\": false,\"use_requirements\": true}}" \
+    --requirements "requirements.xlsx"
+
 # Assign a type to a requirement "REQ-100" from "requirements.xlsx", using a query from "predefined_queries.json"
-vareq --mode query --verbosity info --requirement-id "REQ-100" --query-id assign-type --query-definitions-path "predefined_queries.json" --query-definitions-base-directory "./" --requirements "requirements.xlsx"
+vareq --mode query \
+    --verbosity info \
+    --requirement-id "REQ-100" \
+    --query-id assign-type \
+    --query-definitions-path "predefined_queries.json" \
+    --query-definitions-base-directory "./" \
+    --requirements "requirements.xlsx"
+
 # Detect conflicts in "requirements.xlsx", using a query from "predefined_queries.json"
-vareq --mode query --verbosity info --query-id detect-conflicts --query-definitions-path "predefined_queries.json" --query-definitions-base-directory "./" --requirements "requirements.xlsx"
+vareq --mode query \
+    --verbosity info \
+    --query-id detect-conflicts \
+    --query-definitions-path "predefined_queries.json" \
+    --query-definitions-base-directory "./" \
+    --requirements "requirements.xlsx"
+
 # Reset the database
-vareq --mode reset-db --verbosity debug
+vareq --mode reset-db \
+    --verbosity debug
