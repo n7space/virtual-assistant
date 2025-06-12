@@ -1,6 +1,7 @@
 from typing import List, Dict
 import logging
 import openpyxl
+import os
 
 
 class Requirement:
@@ -78,6 +79,9 @@ class RequirementReader:
         return value
 
     def read_requirements(self, file_name: str) -> List[Requirement]:
+        if not os.path.exists(file_name):
+            logging.error(f"Requirements file {file_name} not found")
+            return []
         result = []
         wb = openpyxl.load_workbook(file_name)
         sheet = wb[self.__mappings.worksheet_name]

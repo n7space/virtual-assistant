@@ -137,6 +137,9 @@ def handle_reset_db(engine: Engine) -> int:
 def handle_unary_query(engine: Engine, args: object) -> int:
     logging.info("Query mode - single requirement")
     config = engine.config
+    if not config.requirements_file_path:
+        print(f"Requirements path not provided")
+        return -1
     mappings = config.lib_config.requirement_document_mappings
     requirements = RequirementReader(mappings).read_requirements(
         config.requirements_file_path
@@ -159,6 +162,9 @@ def handle_unary_query(engine: Engine, args: object) -> int:
 def handle_nary_query(engine: Engine, args: object) -> int:
     logging.info("Query mode - batch")
     config = engine.config
+    if not config.requirements_file_path:
+        print(f"Requirements path not provided")
+        return -1
     mappings = config.lib_config.requirement_document_mappings
     requirements = RequirementReader(mappings).read_requirements(
         config.requirements_file_path
@@ -201,12 +207,27 @@ def handle_serve(engine: Engine, args: object) -> int:
     print("Server mode not yet implemented")
     return -1
 
-def object_to_json_string(obj : object) -> str:
+
+def object_to_json_string(obj: object) -> str:
+    # JSONization needs the object provided as lists or dictionaries
+    # So, for each element, either use:
+    # the built-in __dict__ dictionary
+    # object converted to list, if it is iterable,
+    #   but not a dictionary itself (previous case)
+    #   or a string (conversion not needed)
+
     obj_json = json.dumps(
-        obj, default=lambda o: o.__dict__, sort_keys=True, indent=4
+        obj,
+        default=lambda o: o.__dict__
+        if hasattr(o, "__dict__")
+        else (
+            list(o) if hasattr(o, "__iter__") and not isinstance(o, (str, dict)) else o
+        ),
+        sort_keys=True,
+        indent=4,
     )
     return obj_json
-        
+
 
 def handle_dump_config(config: EngineConfig) -> int:
     config_json = object_to_json_string(config)
@@ -229,7 +250,9 @@ def main():
         logging.info(f"Setting model to {args.model}")
         cfg.llm_config.model_name = args.model
     if args.query_definitions_path:
-        logging.info(f"Reading predefined queries from {args.query_definitions_path}, with base path {args.query_definitions_path}")
+        logging.info(
+            f"Reading predefined queries from {args.query_definitions_path}, with base path {args.query_definitions_path}"
+        )
         cfg.predefined_queries = PredefinedQueryReader(
             args.query_definitions_path
         ).load_from_file(args.query_definitions_path)
