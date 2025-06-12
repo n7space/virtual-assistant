@@ -126,6 +126,11 @@ def handle_chat(engine: Engine) -> int:
 
 
 def handle_reset_db(engine: Engine) -> int:
+    logging.info(f"Deleting all documents")
+    engine.lib.delete_all_documents()
+    logging.info(f"Deleting all requirements")
+    engine.lib.delete_all_requirements()
+    logging.info(f"Deletion done")
     return 0
 
 
@@ -192,14 +197,19 @@ def handle_query(engine: Engine, args: object) -> int:
 
 
 def handle_serve(engine: Engine, args: object) -> int:
+    # TODO
     print("Server mode not yet implemented")
     return -1
 
+def object_to_json_string(obj : object) -> str:
+    obj_json = json.dumps(
+        obj, default=lambda o: o.__dict__, sort_keys=True, indent=4
+    )
+    return obj_json
+        
 
 def handle_dump_config(config: EngineConfig) -> int:
-    config_json = json.dumps(
-        config, default=lambda o: o.__dict__, sort_keys=True, indent=4
-    )
+    config_json = object_to_json_string(config)
     print(config_json)
 
 
@@ -210,23 +220,31 @@ def main():
     cfg = EngineConfig()
     # Handle configuration overrides from the command line arguments
     if args.requirements:
+        logging.info(f"Setting requirements path to {args.requirements}")
         cfg.requirements_file_path = args.requirements
     if args.document_directories:
+        logging.info(f"Setting document directories to {args.document_directories}")
         cfg.document_directories = args.document_directories.split(",")
     if args.model:
+        logging.info(f"Setting model to {args.model}")
         cfg.llm_config.model_name = args.model
     if args.query_definitions_path:
+        logging.info(f"Reading predefined queries from {args.query_definitions_path}, with base path {args.query_definitions_path}")
         cfg.predefined_queries = PredefinedQueryReader(
             args.query_definitions_path
         ).load_from_file(args.query_definitions_path)
     if args.config_path:
+        logging.info(f"Reading config from {args.config_path}")
         with open(args.config_path, "r") as f:
             config_json = json.load(f)
-            vaconfig.update_engine_configuration_from_json(cfg, config_json)
+            cfg = vaconfig.update_engine_configuration_from_json(cfg, config_json)
+    # Config JSON is after path to enable config overwrite from command line
     if args.config_json:
+        logging.info(f"Reading config from JSON {args.config_json}")
         config_json = json.loads(args.config_json)
-        vaconfig.update_engine_configuration_from_json(cfg, config_json)
+        cfg = vaconfig.update_engine_configuration_from_json(cfg, config_json)
 
+    logging.info(f"Using configuration: {object_to_json_string(cfg)}")
     engine = Engine(cfg)
 
     # Handle different modes
