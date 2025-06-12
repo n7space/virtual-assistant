@@ -1,0 +1,40 @@
+{
+    "augmented_chat_config": {
+        "max_knowledge_items": 64,
+        "max_knowledge_size": 16384,
+        "use_documents": true,
+        "use_requirements": true
+    },
+    "batch_query_context_size": 3,
+    "chat_config": {
+        "history_summarization_template": "### Previous history\n{0}\n### New user query\n{1}\n### New system reply\n{2}\n### Instruction\nSummarize the conversation history to include both the previous history, and the new query and reply. Be as concise as possible, do not include any formatting directives.",
+        "query_template": "### History\n{0}\n### Context information\nYou are an expert requirements engineer, working in the space industry. You have access to the following:\n{1}\n### Instruction\n{2}",
+        "remove_thinking": true
+    },
+    "document_directories": [],
+    "lib_config": {
+        "chunk_overlap": 2000,
+        "chunk_size": 8000,
+        "persistent_storage_path": "knowledge_library.db",
+        "requirement_document_mappings": {
+            "description": "C",
+            "first_row_number": 3,
+            "id": "A",
+            "justification": "E",
+            "note": "G",
+            "trace_separator": ",",
+            "traces": "D",
+            "type": "B",
+            "validation_type": "I",
+            "worksheet_name": "5. Requirements"
+        }
+    },
+    "llm_config": {
+        "chat_model_name": "qwen3:0.6b",
+        "embeddings_model_name": "nomic-embed-text",
+        "temperature": 0.8,
+        "url": null
+    },
+    "predefined_queries": [],
+    "requirements_file_path": null
+}

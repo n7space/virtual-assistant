@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 from enum import Enum
 import logging
 import os.path
@@ -39,9 +39,12 @@ class KnowledgeLibrary:
         self.llm = llm
         self.config = config
         self.persistent_db = chromadb.PersistentClient(
-            path=config.persistent_storage_path
+            path=config.persistent_storage_path,
+            settings=chromadb.Settings(anonymized_telemetry=False),
         )
-        self.documents = self.persistent_db.get_or_create_collection(name="documents")
+        self.documents = self.persistent_db.get_or_create_collection(
+            name="documents", metadata={"hnsw:space": "cosine"}
+        )
 
     def read_docx(self, file_path: str) -> str:
         lines = []
@@ -234,12 +237,17 @@ class KnowledgeLibrary:
             timestamp = min(timestamp, meta["timestamp"])
         return timestamp
 
-    def get_relevant_documents(self, text: str, count: int) -> List[str]:
+    def get_relevant_documents(
+        self, text: str, count: int
+    ) -> List[Tuple[str, ItemKind, str]]:
         embedding = self.llm.embedding(text)
         results = self.documents.query(query_embeddings=[embedding], n_results=count)
         docs = []
-        for document in results["documents"][0]:
-            docs.append(document)
+        for i, document in enumerate(results["documents"][0]):
+            metadata = results["metadatas"][0][i]
+            name = metadata.get("name", "")
+            item_kind = ItemKind(metadata.get("type", ItemKind.DOCUMENT.value))
+            docs.append((name, item_kind, document))
         return docs
 
     def get_all_documents(self) -> List[str]:

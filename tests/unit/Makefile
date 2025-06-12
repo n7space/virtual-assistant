@@ -3,6 +3,7 @@ PYTHON ?= python3
 
 TESTS = \
 	test_helpers.py \
+	test_vaconfig.py \
 	test_vaqueries.py \
 	test_varequirementreader.py \
 	test_vaknowledgelibrary.py \
