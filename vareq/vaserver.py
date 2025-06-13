@@ -33,7 +33,6 @@ class ReloadView(views.View):
 
     def __init__(self, context: Context):
         self.context = context
-        pass
 
     def dispatch_request(self):
         logging.info(f"Server reload")
@@ -56,7 +55,6 @@ class ChatView(views.View):
 
     def __init__(self, context: Context):
         self.context = context
-        pass
 
     def dispatch_request(self, query: str):
         logging.info(f"Server chat: {query}")
@@ -86,7 +84,6 @@ class QueryView(views.View):
 
     def __init__(self, context: Context):
         self.context = context
-        pass
 
     def handle_unary(self, query_id: str, requirement_id: str):
         requirement = next(

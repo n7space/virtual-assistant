@@ -138,9 +138,9 @@ def handle_reset_db(config: EngineConfig) -> int:
     return 0
 
 
-def handle_unary_query(config: EngineConfig, args: object) -> int:
+def handle_unary_query(engine: Engine, args: object) -> int:
     logging.info("Query mode - single requirement")
-    engine = Engine(config)
+    config = engine.get_config()
     if not config.requirements_file_path:
         print(f"Requirements path not provided")
         return -1
@@ -163,9 +163,9 @@ def handle_unary_query(config: EngineConfig, args: object) -> int:
     return 0
 
 
-def handle_nary_query(config: EngineConfig, args: object) -> int:
+def handle_nary_query(engine: Engine, args: object) -> int:
     logging.info("Query mode - batch")
-    engine = Engine(config)
+    config = engine.get_config()
     if not config.requirements_file_path:
         print(f"Requirements path not provided")
         return -1
