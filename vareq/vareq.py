@@ -225,10 +225,14 @@ def object_to_json_string(obj: object) -> str:
 
     obj_json = json.dumps(
         obj,
-        default=lambda o: o.__dict__
-        if hasattr(o, "__dict__")
-        else (
-            list(o) if hasattr(o, "__iter__") and not isinstance(o, (str, dict)) else o
+        default=lambda o: (
+            o.__dict__
+            if hasattr(o, "__dict__")
+            else (
+                list(o)
+                if hasattr(o, "__iter__") and not isinstance(o, (str, dict))
+                else o
+            )
         ),
         sort_keys=True,
         indent=4,
