@@ -36,4 +36,7 @@ vareq --mode reset-db \
 # Start server
 vareq --mode serve \
     --verbosity info \
-    --server-config-json "{\"host\" : \"127.0.0.1\", \"port\" : 8080 , \"debug\" : false}"
+    --server-config-json "{\"host\" : \"127.0.0.1\", \"port\" : 8080 , \"debug\" : false}" \
+    --query-definitions-path "predefined_queries.json" \
+    --query-definitions-base-directory "./" \
+    --requirements "requirements.xlsx"

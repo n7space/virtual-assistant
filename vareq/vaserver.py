@@ -1,9 +1,7 @@
 from typing import List
 from flask import Flask, jsonify, views
-import os
 import logging
 import warnings
-import sys
 from .vaengine import Engine, EngineConfig, AugmentedChat
 from .varequirementreader import Requirement, RequirementReader
 
@@ -30,6 +28,59 @@ class Context:
             )
 
 
+class ReloadView(views.View):
+    context: Context
+
+    def __init__(self, context: Context):
+        self.context = context
+        pass
+
+    def dispatch_request(self):
+        logging.info(f"Server reload")
+        try:
+            self.context.reinit()
+            logging.info(f"Server reload done")
+            result = {"status": "ok"}
+            return jsonify(result)
+        except Exception as e:
+            logging.error(f"Exception when handling server reload: {str(e)}")
+            result = {
+                "status": "failed",
+                "error": str(e),
+            }
+            return jsonify(result)
+
+
+class ChatView(views.View):
+    context: Context
+
+    def __init__(self, context: Context):
+        self.context = context
+        pass
+
+    def dispatch_request(self, query: str):
+        logging.info(f"Server chat: {query}")
+        try:
+            reply = self.context.chat.chat(query)
+            logging.info(f"Server chat reply: {reply}")
+            result = {
+                "query": query,
+                "reply": reply.answer,
+                "references": reply.references,
+                "reference_names": reply.reference_names,
+                "status": "ok",
+            }
+            return jsonify(result)
+        except Exception as e:
+            logging.error(f"Exception when handling server chat: {str(e)}")
+            result = {
+                "query": query,
+                "status": "failed",
+                "error": str(e),
+            }
+            return jsonify(result)
+
+
 class QueryView(views.View):
     context: Context
 
@@ -42,6 +93,7 @@ class QueryView(views.View):
             r for r in self.context.requirements if r.id == requirement_id
         )
         reply = self.context.engine.process_query(query_id, requirement)
+        logging.info(f"Server query reply {reply}")
         result = {
             "query_id": query_id,
             "requirement_id": requirement_id,
@@ -54,17 +106,21 @@ class QueryView(views.View):
         reply = self.context.engine.process_batch_query(
             query_id, self.context.requirements
         )
+        logging.info(f"Server query reply {reply}")
         result = {"query_id": query_id, "status": "ok", "reply": reply}
         return jsonify(result)
 
     def dispatch_request(self, query_id: str, requirement_id: str):
-        logging.info(f"Query: query_id : {query_id}, requirement_id : {requirement_id}")
+        logging.info(
+            f"Server query: query_id : {query_id}, requirement_id : {requirement_id}"
+        )
         try:
             if requirement_id:
                 return self.handle_unary(query_id, requirement_id)
             else:
                 return self.handle_nary(query_id)
         except Exception as e:
+            logging.error(f"Exception when handling server query: {str(e)}")
             result = {
                 "query_id": query_id,
                 "requirement_id": requirement_id,
@@ -115,6 +171,14 @@ class VaServer:
         self.app.add_url_rule(
             "/query/<string:query_id>/<string:requirement_id>",
             view_func=QueryView.as_view("unary-query", self.context),
+        )
+        self.app.add_url_rule(
+            "/reload/",
+            view_func=ReloadView.as_view("reload", self.context),
+        )
+        self.app.add_url_rule(
+            "/chat/<string:query>/",
+            view_func=ChatView.as_view("chat", self.context),
         )
         self.app.run(
             host=self.config.host,
