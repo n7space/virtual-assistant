@@ -49,6 +49,7 @@ def update_engine_configuration_from_json(
     update_nested_object_attribute_from_json(config, config_json)
     return config
 
+
 def update_server_configuration_from_json(
     config: ServerConfig, config_json=None
 ) -> ServerConfig:

@@ -107,7 +107,8 @@ should not be fully relied on. Human review should be always applied.
     return 0
 
 
-def handle_chat(engine: Engine) -> int:
+def handle_chat(config: EngineConfig) -> int:
+    engine = Engine(config)
     chat = engine.get_chat()
     logging.info(f"System ready, please enter your query")
     while True:
@@ -127,8 +128,9 @@ def handle_chat(engine: Engine) -> int:
         print(reply.answer)
 
 
-def handle_reset_db(engine: Engine) -> int:
+def handle_reset_db(config: EngineConfig) -> int:
     logging.info(f"Deleting all documents")
+    engine = Engine(config)
     engine.lib.delete_all_documents()
     logging.info(f"Deleting all requirements")
     engine.lib.delete_all_requirements()
@@ -136,9 +138,9 @@ def handle_reset_db(engine: Engine) -> int:
     return 0
 
 
-def handle_unary_query(engine: Engine, args: object) -> int:
+def handle_unary_query(config: EngineConfig, args: object) -> int:
     logging.info("Query mode - single requirement")
-    config = engine.config
+    engine = Engine(config)
     if not config.requirements_file_path:
         print(f"Requirements path not provided")
         return -1
@@ -161,9 +163,9 @@ def handle_unary_query(engine: Engine, args: object) -> int:
     return 0
 
 
-def handle_nary_query(engine: Engine, args: object) -> int:
+def handle_nary_query(config: EngineConfig, args: object) -> int:
     logging.info("Query mode - batch")
-    config = engine.config
+    engine = Engine(config)
     if not config.requirements_file_path:
         print(f"Requirements path not provided")
         return -1
@@ -189,7 +191,8 @@ def handle_nary_query(engine: Engine, args: object) -> int:
     return 0
 
 
-def handle_query(engine: Engine, args: object) -> int:
+def handle_query(config: EngineConfig, args: object) -> int:
+    engine = Engine(config)
     id = args.query_id
     arity = engine.get_query_arity(id)
     if not arity:
@@ -204,10 +207,10 @@ def handle_query(engine: Engine, args: object) -> int:
         return -1
 
 
-def handle_serve(engine: Engine, config : ServerConfig) -> int:
+def handle_serve(engine_config: EngineConfig, server_config: ServerConfig) -> int:
     logging.info("Serve mode")
-    logging.info(f"Using server configuration: {object_to_json_string(config)}")
-    server = VaServer(config)
+    logging.info(f"Using server configuration: {object_to_json_string(server_config)}")
+    server = VaServer(server_config, engine_config)
     server.run()
     return 0
 
@@ -274,10 +277,11 @@ def main():
     if args.server_config_json:
         logging.info(f"Reading server config from JSON {args.server_config_json}")
         server_config_json = json.loads(args.server_config_json)
-        server_config = vaconfig.update_server_configuration_from_json(server_config, server_config_json)
+        server_config = vaconfig.update_server_configuration_from_json(
+            server_config, server_config_json
+        )
 
     logging.info(f"Using configuration: {object_to_json_string(cfg)}")
-    engine = Engine(cfg)
 
     # Handle different modes
     if args.setup_instructions:
@@ -285,16 +289,16 @@ def main():
         return handle_setup_instructions()
     if args.mode == "chat":
         logging.info("Starting chat mode")
-        return handle_chat(engine)
+        return handle_chat(cfg)
     elif args.mode == "query":
         logging.info("Executing query")
-        return handle_query(engine, args)
+        return handle_query(cfg, args)
     elif args.mode == "serve":
         logging.info("Starting serve mode")
-        return handle_serve(engine, server_config)
+        return handle_serve(cfg, server_config)
     elif args.mode == "reset-db":
         logging.info("Resetting database")
-        return handle_reset_db(engine)
+        return handle_reset_db(cfg)
     elif args.mode == "dump-config":
         logging.info("Dumping configuration")
         return handle_dump_config(cfg)

@@ -102,4 +102,3 @@ def test_update_server_configuration_from_json_returns_config_if_json_none():
     result = vaconfig.update_server_configuration_from_json(config, None)
     assert result is config
     assert "example.com" == result.host
-
