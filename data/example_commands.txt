@@ -32,3 +32,8 @@ vareq --mode query \
 # Reset the database
 vareq --mode reset-db \
     --verbosity debug
+
+# Start server
+vareq --mode serve \
+    --verbosity info \
+    --server-config-json "{\"host\" : \"127.0.0.1\", \"port\" : 8080 , \"debug\" : false}"

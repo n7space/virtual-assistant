@@ -8,6 +8,7 @@ from .vallminterface import LlmConfig
 from .vaengine import Engine, EngineConfig
 from .varequirementreader import Mappings, RequirementReader
 from .vaqueries import PredefinedQueryReader
+from .vaserver import VaServer, ServerConfig
 import sys
 import json
 import argparse
@@ -39,6 +40,7 @@ def parse_arguments() -> object:
     parser.add_argument("--query-definitions-path", help="Path to query definitions")
     parser.add_argument("--config-path", help="Path to config file")
     parser.add_argument("--config-json", help="Config JSON string")
+    parser.add_argument("--server-config-json", help="Server config JSON string")
     parser.add_argument("--query-id", help="Query ID for query mode")
     parser.add_argument("--requirement-id", help="Requirement ID for query mode")
     parser.add_argument(
@@ -202,10 +204,12 @@ def handle_query(engine: Engine, args: object) -> int:
         return -1
 
 
-def handle_serve(engine: Engine, args: object) -> int:
-    # TODO
-    print("Server mode not yet implemented")
-    return -1
+def handle_serve(engine: Engine, config : ServerConfig) -> int:
+    logging.info("Serve mode")
+    logging.info(f"Using server configuration: {object_to_json_string(config)}")
+    server = VaServer(config)
+    server.run()
+    return 0
 
 
 def object_to_json_string(obj: object) -> str:
@@ -239,6 +243,7 @@ def main():
     logging_level = get_log_level(args.verbosity)
     logging.basicConfig(level=logging_level)
     cfg = EngineConfig()
+    server_config = ServerConfig()
     # Handle configuration overrides from the command line arguments
     if args.requirements:
         logging.info(f"Setting requirements path to {args.requirements}")
@@ -266,6 +271,10 @@ def main():
         logging.info(f"Reading config from JSON {args.config_json}")
         config_json = json.loads(args.config_json)
         cfg = vaconfig.update_engine_configuration_from_json(cfg, config_json)
+    if args.server_config_json:
+        logging.info(f"Reading server config from JSON {args.server_config_json}")
+        server_config_json = json.loads(args.server_config_json)
+        server_config = vaconfig.update_server_configuration_from_json(server_config, server_config_json)
 
     logging.info(f"Using configuration: {object_to_json_string(cfg)}")
     engine = Engine(cfg)
@@ -282,7 +291,7 @@ def main():
         return handle_query(engine, args)
     elif args.mode == "serve":
         logging.info("Starting serve mode")
-        return handle_serve(engine, args)
+        return handle_serve(engine, server_config)
     elif args.mode == "reset-db":
         logging.info("Resetting database")
         return handle_reset_db(engine)

@@ -22,7 +22,8 @@ setup(
         "pdfplumber==0.11.6",
         "chromadb==1.0.7",
         "mako==1.3.10",
-        "flask==3.1.1"],
+        "flask==3.1.1"
+        ],
     python_requires=">=3.7",
     classifiers=[
         "Programming Language :: Python",

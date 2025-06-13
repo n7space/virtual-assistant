@@ -2,6 +2,7 @@ import pytest
 from types import SimpleNamespace
 from vareq import vaconfig
 from vareq.vaengine import EngineConfig
+from vareq.vaserver import ServerConfig
 
 
 def test_find_parent_for_attribute_retrieves_parent():
@@ -71,3 +72,34 @@ def test_update_engine_configuration_from_json_returns_config_if_json_none():
     config = EngineConfig()
     result = vaconfig.update_engine_configuration_from_json(config, None)
     assert result is config
+
+
+def test_update_server_configuration_from_json_succeeds():
+    config = ServerConfig()
+    config.host = "localhost"
+    config.port = 8000
+    config_json = {
+        "host": "1.2.3.4",
+        "port": 9000,
+    }
+    updated = vaconfig.update_server_configuration_from_json(config, config_json)
+    assert "1.2.3.4" == updated.host
+    assert 9000 == updated.port
+
+
+def test_update_server_configuration_from_json_returns_new_if_no_default_is_provided():
+    updated = vaconfig.update_server_configuration_from_json(
+        None, {"host": "example.com", "port": 5000}
+    )
+    assert isinstance(updated, ServerConfig)
+    assert "example.com" == updated.host
+    assert 5000 == updated.port
+
+
+def test_update_server_configuration_from_json_returns_config_if_json_none():
+    config = ServerConfig()
+    config.host = "example.com"
+    result = vaconfig.update_server_configuration_from_json(config, None)
+    assert result is config
+    assert "example.com" == result.host
+
