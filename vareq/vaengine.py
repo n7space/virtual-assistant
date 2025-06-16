@@ -52,7 +52,7 @@ class AugmentedChat:
         logging.debug(f"Found {len(documents)} relevant documents")
         total_size = 0
         total_count = 0
-        for (_, item_kind, document) in documents:
+        for _, item_kind, document in documents:
             if item_kind == ItemKind.DOCUMENT and not self.config.use_documents:
                 continue
             if item_kind == ItemKind.REQUIREMENT and not self.config.use_requirements:

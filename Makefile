@@ -9,8 +9,24 @@ PYTHON ?= python3
 
 all: check-format check
 
-install:
+install: install-pipx
+
+# Perform a native installation
+install-native:
 	${PYTHON} -m pip install --user --upgrade .
+
+# Perform pipx installation (in a transparent venv)
+install-pipx:
+	pipx install .
+
+# Create a virtual environment and perform an isolated installation
+install-venv:
+	${PYTHON} -m venv venv
+	. venv/bin/activate && ${PYTHON} -m pip install --upgrade pip
+	. venv/bin/activate && ${PYTHON} -m pip install .
+
+clean-venv:
+	rm -rf venv
 
 check:
 	$(MAKE) -C tests check

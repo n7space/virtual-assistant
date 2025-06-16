@@ -1,5 +1,6 @@
 from typing import List
 from .vaengine import EngineConfig
+from .vaserver import ServerConfig
 import logging
 
 
@@ -41,6 +42,19 @@ def update_engine_configuration_from_json(
 ) -> EngineConfig:
     if config is None:
         config = EngineConfig()
+
+    if config_json is None:
+        return config
+
+    update_nested_object_attribute_from_json(config, config_json)
+    return config
+
+
+def update_server_configuration_from_json(
+    config: ServerConfig, config_json=None
+) -> ServerConfig:
+    if config is None:
+        config = ServerConfig()
 
     if config_json is None:
         return config
