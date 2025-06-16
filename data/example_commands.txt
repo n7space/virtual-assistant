@@ -1,3 +1,8 @@
+# This file contains a set of example commands illustrating the use of the Virtual Assistant.
+# The required data files (requirements, predefined queries, etc.) are not included in the repository.
+# Requirements are assumed to be sourced from the project that the Virtual Assistant is applied to.
+# Predefined Queries are distributed separately, to adhere to the licensing of the used resources.
+
 # Override default config using JSON in the command line, so that documents are not used in the chat
 vareq --mode dump-config \
     --config-json "{\"augmented_chat_config\": {\"use_documents\": false,\"use_requirements\": true}}"
@@ -33,7 +38,7 @@ vareq --mode query \
 vareq --mode reset-db \
     --verbosity debug
 
-# Start server
+# Start local server at post 8080, serving chat and queries from "predefined_queries.json", as well as requirements from "requirements.xlsx"
 vareq --mode serve \
     --verbosity info \
     --server-config-json "{\"host\" : \"127.0.0.1\", \"port\" : 8080 , \"debug\" : false}" \
