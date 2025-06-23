@@ -3,6 +3,7 @@ import sys
 from typing import List
 import pdfplumber
 import re
+import logging
 
 
 def is_ecss_reference(text: str) -> bool:
@@ -105,7 +106,7 @@ def write_text_to_file(file_path: str, text: str) -> None:
         with open(file_path, "w", encoding="utf-8") as f:
             f.write(text)
     except Exception as e:
-        print(f"Error writing to file {file_path}: {e}")
+        logging.error(f"Error writing to file {file_path}: {e}")
 
 
 def parse_arguments():
@@ -140,6 +141,7 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
+    logging.basicConfig(level=logging.INFO)
     input_path = args.input
     output_path = args.output
     start_page = args.start_page
