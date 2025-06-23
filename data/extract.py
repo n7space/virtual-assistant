@@ -96,7 +96,7 @@ def extract_all_text_from_pdf(
                     all_lines.extend([line.strip() for line in lines if line.strip()])
         return all_lines
     except Exception as e:
-        print(f"Error extracting text from PDF {pdf_path}: {e}")
+        logging.error(f"Error extracting text from PDF {pdf_path}: {e}")
         return []
 
 
