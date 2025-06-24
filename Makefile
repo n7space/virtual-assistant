@@ -35,7 +35,9 @@ check-format:
 	${BLACK} --version
 	${BLACK} --check vareq
 	${BLACK} --check tests
+	${BLACK} --check data
 
 format:
 	${BLACK} vareq
 	${BLACK} tests
+	${BLACK} data
