@@ -11,7 +11,7 @@
             "id" : "assign-type",
             "arity" : "unary",
             "kind" : "freetext",
-            "query" : "You are an expert requirements engineer working in the aerospace industry. You base your judgements on the following standard:\n<%text>### STANDARD</%text>\n<%include file=\"ECSS-E-ST-10-06C-requirement-types.txt\"/>\n<%text>### INSTRUCTION</%text>\n t:\n Classify the following requirement according to the provided standard. Be concide, state just the requirement type name, without any sentence or extra explanation. Do not include the word \"requirement\" in the reply. Do not include any numbers. ### REQUIREMENT\nID: {0}\nDescription: {1}\nNote: {2}"
+            "query" : "You are an expert requirements engineer working in the aerospace industry. You base your judgements on the following standard:\n<%text>### STANDARD</%text>\n<%include file=\"ECSS-E-ST-10-06C-requirement-types.txt\"/>\n<%text>### INSTRUCTION</%text>\n t:\n Classify the following requirement according to the provided standard. Be concise, state just the requirement type name, without any sentence or extra explanation. Do not include the word \"requirement\" in the reply. Do not include any numbers. ### REQUIREMENT\nID: {0}\nDescription: {1}\nNote: {2}"
         },
         {
             "id" : "reword",
