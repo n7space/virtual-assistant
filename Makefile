@@ -1,11 +1,18 @@
 BLACK=black
 PYTHON ?= python3
 
-.PHONY : check \
+.PHONY : \
+	check \
 	all \
 	install \
+	install-native \
+	install-pipx \
+	install-venv \
+	clean \
+	clean-venv \
 	check-format \
-	format
+	format \
+	get-data
 
 all: check-format check
 
@@ -41,3 +48,9 @@ format:
 	${BLACK} vareq
 	${BLACK} tests
 	${BLACK} data
+
+get-data:
+	${MAKE} -C data
+
+clean: clean-venv
+	${MAKE} -C data clean
