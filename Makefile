@@ -5,7 +5,8 @@ PYTHON ?= python3
 	all \
 	install \
 	check-format \
-	format
+	format \
+	get-data
 
 all: check-format check
 
@@ -41,3 +42,6 @@ format:
 	${BLACK} vareq
 	${BLACK} tests
 	${BLACK} data
+
+get-data:
+	${MAKE} -C data

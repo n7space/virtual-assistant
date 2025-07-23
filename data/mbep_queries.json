@@ -1,0 +1,37 @@
+{
+    "queries" : [
+        {
+            "id" : "review",
+            "arity" : "unary",
+            "kind" : "binary",
+            "query" : "You are an expert requirements engineer working in the aerospace industry. You base your judgements on the following standard:\n<%text>### STANDARD</%text>\n<%include file=\"standards/ECSS-E-ST-10-06C - requirement requirements.txt\"/>\n<%text>### INSTRUCTION</%text>\n Consider the following requirement:\n ### REQUIREMENT\nID: {0}\nDescription: {1}\nNote: {2}\nJustification: {3}\nType: {4}\nValidation: {5}\nTraces: {6}.\n### Instruction\n Estimate, in range 0-100, whether the requirement is compliant with the standard, with 0 indicating non-compliance and 100 indicating full compliance.",
+            "threshold" : 75.0
+        },
+        {
+            "id" : "assign-type",
+            "arity" : "unary",
+            "kind" : "freetext",
+            "query" : "You are an expert requirements engineer working in the aerospace industry. You base your judgements on the following standard:\n<%text>### STANDARD</%text>\n<%include file=\"standards/ECSS-E-ST-10-06C - requirement types.txt\"/>\n<%text>### INSTRUCTION</%text>\n t:\n Classify the following requirement according to the provided standard. Be concide, state just the requirement type name, without any sentence or extra explanation. Do not include the word \"requirement\" in the reply. Do not include any numbers. ### REQUIREMENT\nID: {0}\nDescription: {1}\nNote: {2}"
+        },
+        {
+            "id" : "reword",
+            "arity" : "unary",
+            "kind" : "freetext",
+            "query" : "You are an expert requirements engineer working in the aerospace industry. You base your judgements on the following standard:\n<%text>### STANDARD</%text>\n<%include file=\"standards/ECSS-E-ST-10-06C - requirement requirements.txt\"/>\n<%text>### INSTRUCTION</%text>\n If possible, reword the following requirement to be in line with the standard, focusing on compliance with format restrictions, required verbal forms and unambiguity. Include only the reworded requirement, without any explanations or justifications.\n ### REQUIREMENT\nID: {0}\nDescription: {1}\nNote: {2}\nJustification: {3}\nType: {4}\nValidation: {5}\nTraces: {6}"
+        },
+        {
+            "id" : "detect-conflicts",
+            "arity" : "nary",
+            "kind" : "binary",
+            "threshold" : 60,
+            "query" : "You are an expert requirements engineer working in the aerospace industry. Consider the following requirements:\n#REQUIREMENT 1\n{1} Note: {2} \n#REQUIREMENT 2\n{8} Note: {9}\n#INSTRUCTION Estimate whether the two requirements contradict each other. Provide the answer in range from 0 (the requirements are unrelated) to 100 (the requirements contradict each other). Begin your answer with the estimated value. Keep your answer short."
+        },
+                {
+            "id" : "detect-duplicate",
+            "arity" : "nary",
+            "kind" : "binary",
+            "threshold" : 75,
+            "query" : "You are an expert requirements engineer working in the aerospace industry. Consider the following requirements:\n#REQUIREMENT 1\n{1} Note: {2} \n#REQUIREMENT 2\n{8} Note: {9}\n#INSTRUCTION Estimate, in the range from 0 to 100, whether the two requirements are duplicates of each other. The value of 100 indicates that they are certainly a duplicate. The value of 0 indicates that they are unrelated. Begin your answer with the estimated value. Keep your answer short."
+        }
+    ]
+}
