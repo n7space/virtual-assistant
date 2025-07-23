@@ -26,7 +26,7 @@
             "threshold" : 60,
             "query" : "You are an expert requirements engineer working in the aerospace industry. Consider the following requirements:\n#REQUIREMENT 1\n{1} Note: {2} \n#REQUIREMENT 2\n{8} Note: {9}\n#INSTRUCTION Estimate whether the two requirements contradict each other. Provide the answer in range from 0 (the requirements are unrelated) to 100 (the requirements contradict each other). Begin your answer with the estimated value. Keep your answer short."
         },
-                {
+        {
             "id" : "detect-duplicate",
             "arity" : "nary",
             "kind" : "binary",
