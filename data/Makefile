@@ -3,8 +3,8 @@ PYTHON ?= python3
 .PHONY: all clean
 
 ECSS_DOC=ECSS-E-ST-10-06C6March2009.pdf
-REQUIREMENTS_TXT="ECSS-E-ST-10-06C - requirement requirements.txt"
-TYPES_TXT="ECSS-E-ST-10-06C - requirement types.txt"
+REQUIREMENTS_TXT="ECSS-E-ST-10-06C-requirement-requirements.txt"
+TYPES_TXT="ECSS-E-ST-10-06C-requirement-types.txt"
 
 all: extract_requirements extract_types
 

@@ -263,10 +263,10 @@ def main():
         cfg.llm_config.model_name = args.model
     if args.query_definitions_path:
         logging.info(
-            f"Reading predefined queries from {args.query_definitions_path}, with base path {args.query_definitions_path}"
+            f"Reading predefined queries from {args.query_definitions_path}, with base path {args.query_definitions_base_directory}"
         )
         cfg.predefined_queries = PredefinedQueryReader(
-            args.query_definitions_path
+            args.query_definitions_base_directory
         ).load_from_file(args.query_definitions_path)
     if args.config_path:
         logging.info(f"Reading config from {args.config_path}")

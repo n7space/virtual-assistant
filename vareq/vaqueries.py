@@ -240,7 +240,7 @@ class PredefinedQueryReader:
     base_directory: str
 
     def __init__(self, base_directory: str):
-        self.base_directory = base_directory
+        self.base_directory = base_directory or "."
 
     def load_from_file(self, path: str) -> List[PredefinedQuery]:
         if not os.path.exists(path):
