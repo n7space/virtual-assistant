@@ -35,3 +35,9 @@ jobs:
 
     - name: Style check
       run: make check-format
+
+    - name: Test make install-native
+      run: make install-native
+
+    - name: Test make install-venv
+      run: make install-venv
