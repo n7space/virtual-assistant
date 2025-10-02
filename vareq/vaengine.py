@@ -152,6 +152,9 @@ class Engine:
 
     def get_query_arity(self, id: str) -> QueryArity:
         return self.queries.arity(id)
+    
+    def query_exists(self, id: str) -> bool:
+        return self.queries.exists(id)
 
     def get_config(self) -> EngineConfig:
         return self.config

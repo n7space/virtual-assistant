@@ -22,6 +22,16 @@ class Requirement:
         self.justification = None
         self.traces = []
 
+    def to_dict(self) -> Dict:
+        return {
+            "id": self.id,
+            "type": self.type,
+            "validation_type": self.validation_type,
+            "description": self.description,
+            "note": self.note,
+            "justification": self.justification,
+            "traces": self.traces
+        }
 
 class Mappings:
     worksheet_name: str

@@ -100,25 +100,66 @@ class QueryView(views.View):
         self.context = context
 
     def handle_unary(self, query_id: str, requirement_id: str):
-        requirement = next(
-            r for r in self.context.requirements if r.id == requirement_id
-        )
+        requirement = None
+        try:
+            requirement = next(
+                r for r in self.context.requirements if r.id == requirement_id
+            )
+        except:
+            pass
+        if requirement is None:
+            result = {
+                "query_id": query_id,
+                "requirement_id": requirement_id,
+                "status": "failed",
+                "reply": None,
+                "error": "Requirement not found"
+            }
+            return jsonify(result)
+        if not self.context.engine.query_exists(query_id):
+            result = {
+                "query_id": query_id,
+                "requirement_id": requirement_id,
+                "status": "failed",
+                "reply": None,
+                "error": "Query not found"
+            }
+            return jsonify(result)
         reply = self.context.engine.process_query(query_id, requirement)
         logging.info(f"Server query reply {reply}")
+        status = "failed" if reply is None else "ok"
+        error = "Processing failed" if reply is None else None
         result = {
             "query_id": query_id,
             "requirement_id": requirement_id,
-            "status": "ok",
+            "status": status,
             "reply": reply,
+            "error": error
         }
         return jsonify(result)
 
     def handle_nary(self, query_id):
+        if not self.context.engine.query_exists(query_id):
+            result = {
+                "query_id": query_id,
+                "status": "failed",
+                "reply": None,
+                "error": "Query not found"
+            }
+            return jsonify(result)
         reply = self.context.engine.process_batch_query(
             query_id, self.context.requirements
         )
         logging.info(f"Server query reply {reply}")
-        result = {"query_id": query_id, "status": "ok", "reply": reply}
+        status = "failed" if reply is None else "ok"
+        error = "Processing failed" if reply is None else None
+        batch_data = [element.to_dict() for element in reply]
+        result = {
+            "query_id": query_id, 
+            "status": status,
+            "reply": batch_data,
+            "error": error
+        }
         return jsonify(result)
 
     def dispatch_request(self, query_id: str, requirement_id: str):
@@ -134,6 +175,7 @@ class QueryView(views.View):
             logging.error(f"Exception when handling server query: {str(e)}")
             result = {
                 "query_id": query_id,
+                "reply": None,
                 "requirement_id": requirement_id,
                 "status": "failed",
                 "error": str(e),
