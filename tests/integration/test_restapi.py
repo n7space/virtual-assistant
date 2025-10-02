@@ -14,11 +14,13 @@ TEST_DIR: str = os.path.dirname(os.path.realpath(__file__))
 RESOURCE_DIR: str = os.path.join(TEST_DIR, "resources")
 logging.basicConfig(level=logging.DEBUG)
 
+
 def check_ollama_and_skip():
     config = LlmConfig()
     llm = Llm(config)
     if not llm.is_available():
         pytest.skip("Ollama not available")
+
 
 @pytest.fixture
 def engine_config() -> EngineConfig:
@@ -45,15 +47,14 @@ def server_config() -> ServerConfig:
 
 @pytest.fixture
 def va_server(server_config, engine_config):
-    server = VaServer(server_config=server_config,
-                      engine_config=engine_config)
+    server = VaServer(server_config=server_config, engine_config=engine_config)
     server.prepare()
     yield server
 
 
 @pytest.fixture
 def va_client(va_server):
-    va_server.app.config['TESTING'] = True
+    va_server.app.config["TESTING"] = True
     with va_server.app.test_client() as client:
         yield client
 

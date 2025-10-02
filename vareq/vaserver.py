@@ -27,17 +27,20 @@ class Context:
                 self.config.requirements_file_path
             )
 
+
 class AreYouAliveView(views.View):
     context: Context
+
     def __init__(self, context: Context):
         self.context = context
 
     def dispatch_request(self):
         logging.info(f"Server are you alive")
         result = {
-                "status": "ok",
+            "status": "ok",
         }
         return jsonify(result)
+
 
 class ReloadView(views.View):
     context: Context

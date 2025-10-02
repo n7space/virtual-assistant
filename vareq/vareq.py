@@ -162,6 +162,7 @@ def handle_unary_query(engine: Engine, args: object) -> int:
     print(reply)
     return 0
 
+
 def extract_unique_detections(
     response: List[BatchResponseElement],
 ) -> List[BatchResponseElement]:
@@ -181,6 +182,7 @@ def extract_unique_detections(
                     result.append(element)
 
     return result
+
 
 def handle_nary_query(engine: Engine, args: object) -> int:
     logging.info("Query mode - batch")

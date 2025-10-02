@@ -1,10 +1,6 @@
 import pytest
 import logging
-from vareq.helpers import (
-    cosine_similarity,
-    remove_think_markers,
-    extract_number
-)
+from vareq.helpers import cosine_similarity, remove_think_markers, extract_number
 
 logging.basicConfig(level=logging.DEBUG)
 

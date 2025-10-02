@@ -5,9 +5,8 @@ import logging
 from vareq.vaqueries import BatchResponseElement
 from vareq.varequirementreader import Requirement
 
-from vareq.vareq import (
-    extract_unique_detections
-)
+from vareq.vareq import extract_unique_detections
+
 
 def create_element(requirement: Requirement, other: Optional[Requirement]):
     element = BatchResponseElement()
@@ -16,6 +15,7 @@ def create_element(requirement: Requirement, other: Optional[Requirement]):
         element.applied_requirements.append(other)
         element.message = "detected"
     return element
+
 
 def test_extract_detections_works_when_empty():
     assert extract_unique_detections([]) == []
