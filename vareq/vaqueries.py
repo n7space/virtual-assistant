@@ -50,14 +50,18 @@ class BatchResponseElement:
         self.embedding = []
         self.context_requirements = []
         self.applied_requirements = []
-   
+
     def to_dict(self) -> Dict:
         return {
             "requirement": self.requirement.to_dict() if self.requirement else None,
             "embedding": self.embedding,
-            "applied_requirements": [req.to_dict() for req in self.applied_requirements],
+            "applied_requirements": [
+                req.to_dict() for req in self.applied_requirements
+            ],
             "message": self.message,
-            "context_requirements": [req.to_dict() for req in self.context_requirements]
+            "context_requirements": [
+                req.to_dict() for req in self.context_requirements
+            ],
         }
 
 
@@ -80,7 +84,7 @@ class PredefinedQueries:
             return None
         query = self.queries[id]
         return query.arity
-    
+
     def exists(self, id: str) -> bool:
         return id in self.queries.keys()
 

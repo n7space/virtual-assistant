@@ -30,8 +30,9 @@ class Requirement:
             "description": self.description,
             "note": self.note,
             "justification": self.justification,
-            "traces": self.traces
+            "traces": self.traces,
         }
+
 
 class Mappings:
     worksheet_name: str

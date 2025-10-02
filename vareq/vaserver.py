@@ -113,7 +113,7 @@ class QueryView(views.View):
                 "requirement_id": requirement_id,
                 "status": "failed",
                 "reply": None,
-                "error": "Requirement not found"
+                "error": "Requirement not found",
             }
             return jsonify(result)
         if not self.context.engine.query_exists(query_id):
@@ -122,7 +122,7 @@ class QueryView(views.View):
                 "requirement_id": requirement_id,
                 "status": "failed",
                 "reply": None,
-                "error": "Query not found"
+                "error": "Query not found",
             }
             return jsonify(result)
         reply = self.context.engine.process_query(query_id, requirement)
@@ -134,7 +134,7 @@ class QueryView(views.View):
             "requirement_id": requirement_id,
             "status": status,
             "reply": reply,
-            "error": error
+            "error": error,
         }
         return jsonify(result)
 
@@ -144,7 +144,7 @@ class QueryView(views.View):
                 "query_id": query_id,
                 "status": "failed",
                 "reply": None,
-                "error": "Query not found"
+                "error": "Query not found",
             }
             return jsonify(result)
         reply = self.context.engine.process_batch_query(
@@ -155,10 +155,10 @@ class QueryView(views.View):
         error = "Processing failed" if reply is None else None
         batch_data = [element.to_dict() for element in reply]
         result = {
-            "query_id": query_id, 
+            "query_id": query_id,
             "status": status,
             "reply": batch_data,
-            "error": error
+            "error": error,
         }
         return jsonify(result)
 

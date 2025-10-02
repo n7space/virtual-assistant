@@ -73,6 +73,7 @@ def test_areyoualive_responds(va_client):
     assert len(data) == 1
     assert data["status"] == "ok"
 
+
 def test_query_fails_for_uknown_unary_query(va_client):
     response = va_client.get("/query/unknown/REQ-10")
     assert response.status_code == 200
@@ -84,6 +85,7 @@ def test_query_fails_for_uknown_unary_query(va_client):
     assert data["error"] == "Query not found"
     assert data["reply"] is None
 
+
 def test_query_fails_for_uknown_nary_query(va_client):
     response = va_client.get("/query/unknown/")
     assert response.status_code == 200
@@ -93,6 +95,7 @@ def test_query_fails_for_uknown_nary_query(va_client):
     assert data["status"] == "failed"
     assert data["error"] == "Query not found"
     assert data["reply"] is None
+
 
 def test_query_fails_for_unknown_requirement(va_client):
     response = va_client.get("/query/review/REF-MISSING-10")
@@ -105,6 +108,7 @@ def test_query_fails_for_unknown_requirement(va_client):
     assert data["error"] == "Requirement not found"
     assert data["reply"] is None
 
+
 def test_query_responds_for_unary(va_client):
     check_ollama_and_skip()
     response = va_client.get("/query/review/REQ-10")
@@ -116,6 +120,7 @@ def test_query_responds_for_unary(va_client):
     assert data["status"] == "ok"
     assert data["error"] is None
     assert len(data["reply"]) > 0
+
 
 def test_query_responds_for_nary(va_client):
     check_ollama_and_skip()
@@ -133,12 +138,14 @@ def test_query_responds_for_nary(va_client):
     assert data["reply"][0]["message"] is not None
     assert len(data["reply"][0]["context_requirements"]) > 0
 
+
 def test_reload_responds(va_client):
     response = va_client.get("/reload/")
     assert response.status_code == 200
     data = response.json
     assert len(data) == 1
     assert data["status"] == "ok"
+
 
 def test_chat_responds(va_client):
     check_ollama_and_skip()
@@ -149,6 +156,5 @@ def test_chat_responds(va_client):
     assert data["status"] == "ok"
     assert data["query"] == "please respond"
     assert len(data["reply"]) > 0
-    assert isinstance(data["references"], list) 
+    assert isinstance(data["references"], list)
     assert isinstance(data["reference_names"], list)
-
