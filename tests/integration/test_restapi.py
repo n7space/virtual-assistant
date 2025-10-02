@@ -54,6 +54,7 @@ def server_config() -> ServerConfig:
 
 @pytest.fixture
 def va_server(server_config, engine_config):
+    check_ollama_and_skip()
     server = VaServer(server_config=server_config, engine_config=engine_config)
     server.prepare()
     yield server
@@ -110,7 +111,6 @@ def test_query_fails_for_unknown_requirement(va_client):
 
 
 def test_query_responds_for_unary(va_client):
-    check_ollama_and_skip()
     response = va_client.get("/query/review/REQ-10")
     assert response.status_code == 200
     data = response.json
@@ -123,7 +123,6 @@ def test_query_responds_for_unary(va_client):
 
 
 def test_query_responds_for_nary(va_client):
-    check_ollama_and_skip()
     response = va_client.get("/query/detect-duplicate/")
     assert response.status_code == 200
     data = response.json
@@ -148,7 +147,6 @@ def test_reload_responds(va_client):
 
 
 def test_chat_responds(va_client):
-    check_ollama_and_skip()
     response = va_client.get("/chat/please%20respond/")
     assert response.status_code == 200
     data = response.json
