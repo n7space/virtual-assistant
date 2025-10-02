@@ -2,8 +2,6 @@ from typing import List
 import numpy
 import re
 
-from vareq.vaqueries import BatchResponseElement
-
 
 def cosine_similarity(embedding_1: List[float], embedding_2: List[float]):
     embedding_1 = numpy.array(embedding_1)
@@ -29,24 +27,3 @@ def extract_number(text: str) -> float:
     if match:
         return float(match.group())
     return 0.0
-
-
-def extract_unique_detections(
-    response: List[BatchResponseElement],
-) -> List[BatchResponseElement]:
-    unique_pairs = {}
-    result = []
-
-    for element in response:
-        for applied_requirement in element.applied_requirements:
-            if element.message:
-                pair = (element.requirement, applied_requirement)
-                reversed_pair = (applied_requirement, element.requirement)
-
-                if pair not in unique_pairs:
-                    # The same pair will not be generated again,
-                    # However, we want to prevent the reversed duplicate
-                    unique_pairs[reversed_pair] = True
-                    result.append(element)
-
-    return result
