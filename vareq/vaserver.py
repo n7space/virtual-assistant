@@ -27,6 +27,17 @@ class Context:
                 self.config.requirements_file_path
             )
 
+class AreYouAliveView(views.View):
+    context: Context
+    def __init__(self, context: Context):
+        self.context = context
+
+    def dispatch_request(self):
+        logging.info(f"Server are you alive")
+        result = {
+                "status": "ok",
+        }
+        return jsonify(result)
 
 class ReloadView(views.View):
     context: Context
@@ -149,7 +160,7 @@ class VaServer:
         self.config = server_config
         self.context = Context(engine_config)
 
-    def run(self):
+    def prepare(self):
         if not self.config.debug:
             # Disable Flask warnings related to the development usage.
             # Flask insists on being wrapped by a WSGI server
@@ -177,6 +188,13 @@ class VaServer:
             "/chat/<string:query>/",
             view_func=ChatView.as_view("chat", self.context),
         )
+        self.app.add_url_rule(
+            "/areyoualive/",
+            view_func=AreYouAliveView.as_view("areyoualive", self.context),
+        )
+
+    def run(self):
+        self.prepare()
         self.app.run(
             host=self.config.host,
             port=self.config.port,
