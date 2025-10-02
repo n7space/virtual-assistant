@@ -105,7 +105,7 @@ class QueryView(views.View):
             requirement = next(
                 r for r in self.context.requirements if r.id == requirement_id
             )
-        except:
+        except StopIteration:
             pass
         if requirement is None:
             result = {

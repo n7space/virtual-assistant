@@ -75,7 +75,7 @@ def test_areyoualive_responds(va_client):
     assert data["status"] == "ok"
 
 
-def test_query_fails_for_uknown_unary_query(va_client):
+def test_query_fails_for_unknown_unary_query(va_client):
     response = va_client.get("/query/unknown/REQ-10")
     assert response.status_code == 200
     data = response.json
@@ -87,7 +87,7 @@ def test_query_fails_for_uknown_unary_query(va_client):
     assert data["reply"] is None
 
 
-def test_query_fails_for_uknown_nary_query(va_client):
+def test_query_fails_for_unknown_nary_query(va_client):
     response = va_client.get("/query/unknown/")
     assert response.status_code == 200
     data = response.json
