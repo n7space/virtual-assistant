@@ -1,0 +1,10 @@
+Fake standard
+
+1. Each requirement shall use "shall". Use of "may", "might" or "could" is forbidden.
+2. Each requirement shall be assigned to one of the following types:
+a) functional
+b) performance
+3. Each requirement shall be assigned to one of the following validation types:
+a) test
+b) analysis
+4. Each requirement shall either trace to a higher level requirement, or provide a justification.

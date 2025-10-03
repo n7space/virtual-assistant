@@ -2,9 +2,13 @@ SRC_DIR = ../
 
 .PHONY : \
 	check \
+	integration \
 	unit
 
 unit:
 	${MAKE} -C $@ check
 
-check: unit
+integration:
+	${MAKE} -C $@ check
+
+check: unit integration

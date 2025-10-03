@@ -1,4 +1,4 @@
-from vareq.vallminterface import ChatConfig, LlmConfig, Llm
+from vareq.vallminterface import LlmConfig, Llm
 from vareq.varequirementreader import Mappings, Requirement
 from vareq.vaengine import Engine, EngineConfig, PredefinedQuery
 from vareq.vaqueries import QueryArity, QueryKind

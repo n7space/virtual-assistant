@@ -1,9 +1,9 @@
 import logging
 
-from vareq import helpers
+from typing import List
 from vareq import vaconfig
 
-from .vaqueries import QueryArity
+from .vaqueries import QueryArity, BatchResponseElement
 from .vallminterface import LlmConfig
 from .vaengine import Engine, EngineConfig
 from .varequirementreader import Mappings, RequirementReader
@@ -163,6 +163,27 @@ def handle_unary_query(engine: Engine, args: object) -> int:
     return 0
 
 
+def extract_unique_detections(
+    response: List[BatchResponseElement],
+) -> List[BatchResponseElement]:
+    unique_pairs = {}
+    result = []
+
+    for element in response:
+        for applied_requirement in element.applied_requirements:
+            if element.message:
+                pair = (element.requirement, applied_requirement)
+                reversed_pair = (applied_requirement, element.requirement)
+
+                if pair not in unique_pairs:
+                    # The same pair will not be generated again,
+                    # However, we want to prevent the reversed duplicate
+                    unique_pairs[reversed_pair] = True
+                    result.append(element)
+
+    return result
+
+
 def handle_nary_query(engine: Engine, args: object) -> int:
     logging.info("Query mode - batch")
     config = engine.get_config()
@@ -175,7 +196,7 @@ def handle_nary_query(engine: Engine, args: object) -> int:
     )
     query_id = args.query_id
     reply = engine.process_batch_query(query_id, requirements)
-    clean_reply = helpers.extract_unique_detections(reply)
+    clean_reply = extract_unique_detections(reply)
     logging.info(f"Query result:")
     for element in clean_reply:
         if (

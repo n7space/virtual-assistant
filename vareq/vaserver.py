@@ -28,6 +28,20 @@ class Context:
             )
 
 
+class AreYouAliveView(views.View):
+    context: Context
+
+    def __init__(self, context: Context):
+        self.context = context
+
+    def dispatch_request(self):
+        logging.info(f"Server are you alive")
+        result = {
+            "status": "ok",
+        }
+        return jsonify(result)
+
+
 class ReloadView(views.View):
     context: Context
 
@@ -86,25 +100,66 @@ class QueryView(views.View):
         self.context = context
 
     def handle_unary(self, query_id: str, requirement_id: str):
-        requirement = next(
-            r for r in self.context.requirements if r.id == requirement_id
-        )
+        requirement = None
+        try:
+            requirement = next(
+                r for r in self.context.requirements if r.id == requirement_id
+            )
+        except StopIteration:
+            pass
+        if requirement is None:
+            result = {
+                "query_id": query_id,
+                "requirement_id": requirement_id,
+                "status": "failed",
+                "reply": None,
+                "error": "Requirement not found",
+            }
+            return jsonify(result)
+        if not self.context.engine.query_exists(query_id):
+            result = {
+                "query_id": query_id,
+                "requirement_id": requirement_id,
+                "status": "failed",
+                "reply": None,
+                "error": "Query not found",
+            }
+            return jsonify(result)
         reply = self.context.engine.process_query(query_id, requirement)
         logging.info(f"Server query reply {reply}")
+        status = "failed" if reply is None else "ok"
+        error = "Processing failed" if reply is None else None
         result = {
             "query_id": query_id,
             "requirement_id": requirement_id,
-            "status": "ok",
+            "status": status,
             "reply": reply,
+            "error": error,
         }
         return jsonify(result)
 
     def handle_nary(self, query_id):
+        if not self.context.engine.query_exists(query_id):
+            result = {
+                "query_id": query_id,
+                "status": "failed",
+                "reply": None,
+                "error": "Query not found",
+            }
+            return jsonify(result)
         reply = self.context.engine.process_batch_query(
             query_id, self.context.requirements
         )
         logging.info(f"Server query reply {reply}")
-        result = {"query_id": query_id, "status": "ok", "reply": reply}
+        status = "failed" if reply is None else "ok"
+        error = "Processing failed" if reply is None else None
+        batch_data = [element.to_dict() for element in reply]
+        result = {
+            "query_id": query_id,
+            "status": status,
+            "reply": batch_data,
+            "error": error,
+        }
         return jsonify(result)
 
     def dispatch_request(self, query_id: str, requirement_id: str):
@@ -120,6 +175,7 @@ class QueryView(views.View):
             logging.error(f"Exception when handling server query: {str(e)}")
             result = {
                 "query_id": query_id,
+                "reply": None,
                 "requirement_id": requirement_id,
                 "status": "failed",
                 "error": str(e),
@@ -149,7 +205,7 @@ class VaServer:
         self.config = server_config
         self.context = Context(engine_config)
 
-    def run(self):
+    def prepare(self):
         if not self.config.debug:
             # Disable Flask warnings related to the development usage.
             # Flask insists on being wrapped by a WSGI server
@@ -177,6 +233,13 @@ class VaServer:
             "/chat/<string:query>/",
             view_func=ChatView.as_view("chat", self.context),
         )
+        self.app.add_url_rule(
+            "/areyoualive/",
+            view_func=AreYouAliveView.as_view("areyoualive", self.context),
+        )
+
+    def run(self):
+        self.prepare()
         self.app.run(
             host=self.config.host,
             port=self.config.port,
