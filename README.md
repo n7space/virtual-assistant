@@ -129,7 +129,7 @@ Configuration is supplied via JSON provided either as a command line argument or
  "validation_type": { # Column name containing requirement validation types
  "type": "string"
  },
- "worksheet_name": { Name of the worksheet containing the requirements
+ "worksheet_name": { # Name of the worksheet containing the requirements
  "type": "string"
  }
  },
