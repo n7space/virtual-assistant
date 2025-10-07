@@ -167,7 +167,7 @@ Configuration is supplied via JSON provided either as a command line argument or
  "type": "number"
  },
  "url": { # URL of remote Ollama server (if used)
- "type": "string" or “null”
+ "type": ["string", "null"]
  }
  },
  "required": [
