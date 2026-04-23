@@ -17,7 +17,7 @@
             "id" : "assign-type",
             "arity" : "unary",
             "kind" : "freetext",
-            "query" : "You are an expert requirements engineer. Assign the given requirement to one of the following types: performance, function or operation. ### REQUIREMENT {1}"
+            "query" : "You are an expert requirements engineer. Assign the given requirement to exactly one of the following types: performance, functional, interface. Answer with only the type token. ### REQUIREMENT {1}"
         }
     ]
 }
