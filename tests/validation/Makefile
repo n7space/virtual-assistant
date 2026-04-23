@@ -1,5 +1,4 @@
 # Validation Makefile for Virtual Assistant Requirements
-# This Makefile validates requirements defined in requirements.md
 
 SHELL := /bin/bash
 QUERY_DEFS := validation_queries.json
