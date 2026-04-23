@@ -54,3 +54,7 @@ get-data:
 
 clean: clean-venv
 	${MAKE} -C data clean
+
+validation: install
+	${MAKE} -C tests/validation all
+	

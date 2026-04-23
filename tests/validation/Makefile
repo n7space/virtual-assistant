@@ -1,4 +1,5 @@
 # Validation Makefile for Virtual Assistant Requirements
+# Due to the use of an actual LLM, which is resource intensive, this Makefile is not run automatically.
 
 SHELL := /bin/bash
 QUERY_DEFS := validation_queries.json
