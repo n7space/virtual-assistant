@@ -1,0 +1,19 @@
+Validation Standard for Requirements Engineering
+
+1. Each requirement shall use "shall" to indicate mandatory behavior. Use of "may", "might" or "could" is forbidden for mandatory requirements.
+
+2. Each requirement shall be assigned to one of the following types:
+   a) functional - describes what the system does
+   b) performance - describes how well the system performs
+   c) interface - describes how the system interacts with external entities
+
+3. Each requirement shall be assigned to one of the following validation methods:
+   a) test - requirement is verified through testing
+   b) analysis - requirement is verified through analysis or inspection
+   c) demonstration - requirement is verified through demonstration
+
+4. Each requirement shall either trace to a higher level requirement, or provide a justification for its existence.
+
+5. Each requirement shall be uniquely identifiable with a stable identifier.
+
+6. Requirements shall be written in clear, unambiguous language avoiding subjective terms.

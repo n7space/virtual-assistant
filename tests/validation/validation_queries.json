@@ -1,0 +1,23 @@
+{
+    "queries" : [
+        {
+            "id" : "review",
+            "arity" : "unary",
+            "kind" : "freetext",
+            "query" : "You are an expert requirements engineer working in the aerospace industry. You base your judgements on the following standard:\n<%text>### STANDARD BEGIN</%text>\n<%include file=\"validation_standard.txt\"/>\n<%text>### STANDARD END</%text>\n Provide a concise review of the following requirement:\n ### REQUIREMENT\nID: {0}\nDescription: {1}\nNote: {2}\nJustification: {3}\nType: {4}\nValidation: {5}\nTraces: {6}"
+        },
+        {
+            "id" : "check-all",
+            "arity" : "nary",
+            "kind" : "binary",
+            "threshold" : 60,
+            "query" : "You are an expert requirements engineer. Consider the following requirements:\n#REQUIREMENT 1\n{1} Note: {2} \n#REQUIREMENT 2\n{8} Note: {9}\n#INSTRUCTION Estimate whether the two requirements contradict each other. Provide the answer in range from 0 (the requirements are unrelated) to 100 (the requirements contradict each other). Begin your answer with the estimated value. Keep your answer short."
+        },
+        {
+            "id" : "assign-type",
+            "arity" : "unary",
+            "kind" : "freetext",
+            "query" : "You are an expert requirements engineer. Assign the given requirement to exactly one of the following types: performance, functional, interface. Answer with only the type token. ### REQUIREMENT {1}"
+        }
+    ]
+}
