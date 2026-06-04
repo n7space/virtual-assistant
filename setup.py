@@ -17,7 +17,7 @@ setup(
         "python-docx==1.1.2",
         "requests==2.32.4",
         "langchain==0.3.24",
-        "langchain-core==0.3.56",
+        "langchain-core==0.3.81",
         "langchain-ollama==0.3.2",
         "pdfplumber==0.11.6",
         "chromadb==1.0.7",
